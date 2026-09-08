@@ -1,0 +1,23 @@
+---
+title: "E155 Porfolio"
+image: images/headshot_joshuaikehara.jpg
+about:
+  template: jolla
+  links:
+    - icon: linkedin
+      text: LinkedIn
+      href: https://linkedin.com
+    - icon: github 
+      text: Github
+      href: https://github.com/joshuaikehara
+format:
+  html:
+    include-in-header:
+      text: |
+        <style>
+        .about-image {
+          object-position: center 20%;
+        }
+        </style>
+---
+Joshua Ikehara is a senior Engineering student at Harvey Mudd College with a focus in Electrical Engineering. He enjoy hands-on problem solving, learning how things work, and taking on challenging projects. Outside of academics, He's involved in research, engineering projects, mentoring, and volleyball. He's especially interested in aerospace and technology and enjoy opportunities to learn, build, and work with others.
