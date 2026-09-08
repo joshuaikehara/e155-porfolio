@@ -111,7 +111,7 @@ statements produce the correct outputs, and that the counter's blink output is c
 The source code for the project can be found in the associated [Github repository](https://github.com/joshuaikehara/e155-lab1/tree/274e9145daaaae359c8ea8ba6adafae6e45bb3e0/lab1_JI/source/impl_1)
 
 ## Block Diagram
-![Block diagram of the Verilog design](images\IMG_3032.jpg){#fig-block-diagram fig-align="center"}
+![Block diagram of the Verilog design](images\IMG_3036.jpg){#fig-block-diagram fig-align="center"}
 
 The block diagram in @fig-block-diagram demonstrates the overall architecture of the Verilog design. The top-level module lab1_JI includes three
 submodules, the high-speed oscillator (HSOSC), the seven-segment display(lab1_seven_segment), and the counter (lab1_counter). The top-level
