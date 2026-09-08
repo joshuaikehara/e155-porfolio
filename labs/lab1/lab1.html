@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Joshua Ikehara">
+<meta name="dcterms.date" content="2026-09-07">
+
+<title>Lab 1: FPGA and MCU Setup and Testing – E155 Porfolio</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-172ba59bd5e0b52282274ba0c0cc16fc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">E155 Porfolio</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-labs" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Labs</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-labs">    
+        <li>
+    <a class="dropdown-item" href="../../labs/lab1/lab1.html">
+ <span class="dropdown-text">Lab1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab2/lab2.html">
+ <span class="dropdown-text">Lab2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab3/lab3.html">
+ <span class="dropdown-text">Lab3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab4/lab4.html">
+ <span class="dropdown-text">lab4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab5/lab5.html">
+ <span class="dropdown-text">lab5</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab6/lab6.html">
+ <span class="dropdown-text">lab6</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../labs/lab7/lab7.html">
+ <span class="dropdown-text">Lab7</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="../../resources.html"> 
+<span class="menu-text">resources</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology"><span class="header-section-number">2</span> Design and Testing Methodology</a>
+  <ul class="collapse">
+  <li><a href="#hardware-design" id="toc-hardware-design" class="nav-link" data-scroll-target="#hardware-design"><span class="header-section-number">2.1</span> Hardware Design</a></li>
+  <li><a href="#verilog-design" id="toc-verilog-design" class="nav-link" data-scroll-target="#verilog-design"><span class="header-section-number">2.2</span> Verilog Design</a></li>
+  <li><a href="#testing" id="toc-testing" class="nav-link" data-scroll-target="#testing"><span class="header-section-number">2.3</span> Testing</a></li>
+  </ul></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation"><span class="header-section-number">3</span> Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#block-diagram" id="toc-block-diagram" class="nav-link" data-scroll-target="#block-diagram"><span class="header-section-number">3.1</span> Block Diagram</a></li>
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic"><span class="header-section-number">3.2</span> Schematic</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussions" id="toc-results-and-discussions" class="nav-link" data-scroll-target="#results-and-discussions"><span class="header-section-number">4</span> Results and Discussions</a>
+  <ul class="collapse">
+  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation"><span class="header-section-number">4.1</span> Testbench simulation</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary"><span class="header-section-number">6</span> AI Prototype Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 1: FPGA and MCU Setup and Testing</h1>
+<p class="subtitle lead">Hours Taken: 24 hours</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Ikehara </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 7, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In this lab, I assembled and varified the hardware (custom PCB board, MCU and FPGA boards),designed and simulated FPGA logic, programmed it onto the board, created testbenches to verify each individual module as well as the complete top-level design, programmed the design onto the FPGA, and experimentally confirmed that the LEDs and 7-segment display worked as specified.</p>
+</section>
+<section id="design-and-testing-methodology" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Design and Testing Methodology</h1>
+<p>The design was approached from both a hardware and a software perspective. From the hardware perspective, with implementation divided into smaller functional blocks that could be independently tested before being integrated into the top-level design</p>
+<section id="hardware-design" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="hardware-design"><span class="header-section-number">2.1</span> Hardware Design</h2>
+<p>The hardware consists of the FPGA development board, four DIP switches, three LEDs and a common anode seven-segement display. the four DIP switches provide the four-bit input to the FPGA, with adjacent switches corresponding to adjacent bits from <code>s[0]</code> to <code>s[3]</code>. The switches are used to select the hexadecimal value displayed on the seven-segment display and to control the two logic-operation LEDs.</p>
+<p>The seven-segement display is connected using one FPGA output for each of the seven segements. Since the display is common-anode, its common anode connection is tied to the 3.3V and the FPGA GPIO pins are connected to the individual sgement cathodes. A logic low therefore causes the segment to illuminate. Each segment has its own current limiting resistor to keep the LED current within the recommended operating range. Using individual resistors also helps ensure that the segments have consistent brightness regardless of how many segements are illumninated</p>
+<details>
+<summary>
+<b>Click to expand Calculations for Resistor Value</b>
+</summary>
+<div id="fig-led-calc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-led-calc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/2B2A7548-97DB-4419-ABA8-55E3174C20FE.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-led-calc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Calculations for a single LED in the seven-segment display
+</figcaption>
+</figure>
+</div>
+</details>
+<details>
+<summary>
+<b>Click to expand Theory for Equal Illumination</b>
+</summary>
+<div id="fig-led-equal-illumination" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-led-equal-illumination-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/2B2A7548-97DB-4419-ABA8-55E3174C20FE.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-led-equal-illumination-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Theory of design for equal illumination
+</figcaption>
+</figure>
+</div>
+</details>
+<p>Three LEDs are connected to the FPGA outputs that correspond to <code>led[0]</code> <code>led[1]</code> and <code>led[2]</code>. The first two LEDs implement the required logic functions from the DIP switches, while the third LED is driven by the counter and flashes at 2.4Hz. The FPGA’s internal high speed oscillator (HSOSC) supplies the clock for the counter, so no external clock signal is required.</p>
+<details>
+<summary>
+<b>Click to expand Calculation for Counter value for 2.4Hz blink rate</b>
+</summary>
+<div id="fig-counter-value-calc" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-counter-value-calc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\IMG_3027.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-counter-value-calc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Calculation for Counter value for 2.4Hz blink rate
+</figcaption>
+</figure>
+</div>
+</details>
+</section>
+<section id="verilog-design" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="verilog-design"><span class="header-section-number">2.2</span> Verilog Design</h2>
+<p>The verilog design was divided into a seven-segment decoder and a counter, with the switch-to-LED logic implemented directly in the top-level module. The seven-segment decoder uses a combinational case statement to map each of the sixteen possible four-bit inputs into a unique seven-segement pattern representative of the number/letter represented in hexadecimal. The decoder provides distinct shapes for all hexadecimal values from 0x0 through 0xF.</p>
+<p>The counter is implemnted in its own module using a single <code>always_ff</code> block. It includes reset, enable, and maximm count functionality. When reset is asserted, the counter and blink output are cleared. When enable is asserted, the counter increments on each rsing edge of the oscillator clck. When the counter reaches its maximum vaue, it returns to zero and toggles blink output. The counter uses parameters for both its width and maximum count, allowing a small counter to be used during simulation while the full-size cunter is used for the hardware implementation.</p>
+<p>The switch-to-LED operations are implemented directly in the top-level-module using <code>assign</code> statements. This follows the required structure while keeping the top-level design simple. the top-level module consits of the HSOSC and instantiations of the counter and the seven-segement decoder</p>
+<p>For the flashing LED, te counter was sized based on the oscillator frequency and required flashing frequency. With a 48MHz clock and a desired LED frequency of 2.4Hz, the LED must complete one full on/off cycle at that frequency. Since the blink output toggles twice during each cycle, it must toggle at a frequency two times 2.4Hz. Therefore, the counter requires</p>
+<p><span class="math display">\[
+\begin{aligned}
+48\,\text{MHz} &amp;= 48{,}000{,}000\,\text{Hz} \\
+\text{counter value} &amp;= \frac{48{,}000{,}000\,\text{Hz}}{2 \times 2.4\,\text{Hz}} \\
+\text{counter value} &amp;= 10{,}000{,}000
+\end{aligned}
+\]</span></p>
+<p>clock cycles between toggles. The counter therefore counts from 0 through 9,999,999 before toggling the LED. A 24-bit counter is sufficent becuase it can represent values up to 16,777,215.</p>
+</section>
+<section id="testing" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="testing"><span class="header-section-number">2.3</span> Testing</h2>
+<p>Each functional portion of the design was tested independently using automatic SystemVerilog testbenches in QuestSim before testing the complete top-level design.</p>
+<p>The seven-segement decoder testbench tests all sixteen possible four-bit inputs. For each input, an assertion compared the decoder output against the expected seven-segement pattern. This demonstrates that all hexadecimal digits from 0x0 through 0xF are implemented correctly.</p>
+<p>The counter testbench used a small parameterized maximum count so that its behavior could be observed quickly in simulation. The testbench verified each required counter feature. Reset was checked to ensure that the counter returned to zero, enable was checked to ensure that the counter stopped when disabled and resumed when enabled, and the maximum count behavior was checked to ensure that the counter returned to zero and toggled the blink output when the maximum value was reached. These tests demonstrate the required sequential behavior without requiring millions of clock cycles to be simulated (much faster and easier to confirm the counter is working).</p>
+<p>The top-level testbench was designed to test functionality that was not already covered by the module-level testbenches. Becasue top-level module generates its clock internally using HSOSC, the test bench does not provide an external clock. Instead, the testbench observes the internal oscillator and verifies that it produces clock activity. The top-level testbench also verifies that the seven-segement decoder is correctly connected to the top-level <code>seg</code> output, that the switch-to-LED <code>assign</code> statements produce the correct outputs, and that the counter’s blink output is correctly connected to <code>led[2]</code>.</p>
+</section>
+</section>
+<section id="technical-documentation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Technical Documentation</h1>
+<p>The source code for the project can be found in the associated <a href="https://github.com/joshuaikehara/e155-lab1/tree/274e9145daaaae359c8ea8ba6adafae6e45bb3e0/lab1_JI/source/impl_1">Github repository</a></p>
+<section id="block-diagram" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="block-diagram"><span class="header-section-number">3.1</span> Block Diagram</h2>
+<div id="fig-block-diagram" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-block-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\IMG_3032.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-block-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Block diagram of the Verilog design
+</figcaption>
+</figure>
+</div>
+<p>The block diagram in <a href="#fig-block-diagram" class="quarto-xref">Figure&nbsp;4</a> demonstrates the overall architecture of the Verilog design. The top-level module lab1_JI includes three submodules, the high-speed oscillator (HSOSC), the seven-segment display(lab1_seven_segment), and the counter (lab1_counter). The top-level module also contains the XOR and AND gates used to control <code>led[0]</code> and <code>led[1]</code>, respectively.</p>
+<p>The internal oscillator generates the int_osc clock signal, which is connected to the <code>clk</code> input of the <code>blink_counter</code> instance. The counter generates the <code>blink</code> signal, which is connected to <code>led[2]</code>. The switch input <code>s[3:0]</code> is connected to the <code>seven_segment</code> instance and is also used as inputs to the XOR and AND gates. The ’ seven_segment ’ decoder produces the <code>seg[6:0]</code> output. All module ports and internal nets are labeled, including the internal <code>inc_osc</code> and <code>blink</code> signals, and multi-bit signals are represented using bus notation like <code>s[3:0]</code>.</p>
+</section>
+<section id="schematic" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="schematic"><span class="header-section-number">3.2</span> Schematic</h2>
+<div id="fig-FPGA-hardware-interface" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-FPGA-hardware-interface-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\IMG_3030.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-FPGA-hardware-interface-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Schematic of FPGA Hardware interface Schematic
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-FPGA-hardware-interface" class="quarto-xref">Figure&nbsp;5</a> shows the physical eletrical connections between the UPduino FPGA to the four DIP switches and three LEDs connected through the custom PCB board. The schematic also shows the external connection to the common anode seven segment display. The DIP switches provide the four bit input to the FPGA, while the FPGA outputs drive the three LEDs and seven-segement display. Each LED and seven-segement segment is connected through its own current-limiting resistor to limit the ouotput current and prevent excessive loading of the FPGA I/O pins. The seven-segement display is common-anode, so its anode is connected to 3.3V and the FPGA drives the individual cathoes low to illuminate the corresponding segements. The Schematic also labels the FPGA pin assignments and their corresponding variables in the SystemVerilog code, component values, and power and ground connections used to construct the circuit.</p>
+</section>
+</section>
+<section id="results-and-discussions" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Results and Discussions</h1>
+<p>The design accomplished all of the prescribed tasks for Lab 1. The four DIP switches correctly controlled the three LEDs and the seven-segment display. The first LED follows the required XOR logic for switches S1 and S0, while the second LED turns on only when both S3 and S2 are on. The seven-segment display correctly displays all sixteen hexadecimal values from 0 through F using the required common-anode, active-low outputs.</p>
+<section id="testbench-simulation" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="testbench-simulation"><span class="header-section-number">4.1</span> Testbench simulation</h2>
+<p>The design was tested using QuestaSim with separate testbenches for the seven-segment decoder, counter, and top-level module. The seven-segment testbench verified all sixteen possible switch combinations and confirmed that each hexadecimal value produced the expected segment pattern as shown in <a href="#fig-Seven-Segment-Decoder-tb-results" class="quarto-xref">Figure&nbsp;6</a>.</p>
+<div id="fig-Seven-Segment-Decoder-tb-results" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-Seven-Segment-Decoder-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\seven_segment_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-Seven-Segment-Decoder-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Seven-Segment Decoder Testbench Simulation Results
+</figcaption>
+</figure>
+</div>
+<p>The counter testbench verified that reset set the counter to 0, <code>enable = 1</code> started the counter, <code>enable = 0</code> stopped the counter, and the counter wrapped back to 0 when it reached the maximum count. A reduced counter size was used to make the simulation faster. The expected waveforms showing this working can be seen in <a href="#fig-counter-tb-results" class="quarto-xref">Figure&nbsp;7</a></p>
+<div id="fig-counter-tb-results" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-counter-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\counter tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-counter-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Counter Testbench Simulation Results
+</figcaption>
+</figure>
+</div>
+<p>The top-level testbench verified the connections between modules, including the seven-segment decoder output and the segments of the seven-segment display (<code>s[0]-s[6]</code>) and the counter output connected to <code>led [2]</code>. It also verified the combinational logic for <code>led [0]</code> and <code>led[1]</code> across all sixteen switch combinations since that wasn’t tested in any other testbench. <a href="#fig-top-tb-results" class="quarto-xref">Figure&nbsp;9</a> shows the resulting QuestaSim waveforms, where the counter increments, wraps back to zero at the maximum count, and toggles the <code>blink</code> output. <code>led [2]</code> follows the <code>blink</code> signal as expected.</p>
+<p>For the physical design, the internal HSOSC was configured for its nominal 48 MHz output. To achieve the required 2.4 Hz blinking frequency, <code>led [2]</code> must toggle at this rate, corresponding to 10,000,000 clock cycles. Therefore, the counter was configured with a maximum count of 9,999,999. A 24-bit counter is sufficient because it can represent values up to 16,777,215.</p>
+<p>This calculated frequency was futher conofimed experimentally by temporarily connecting <code>led[2]</code> to FPGA pin P44 and measuring the output signal with an oscilloscope. The measured waveform had a frequency of 2.4 Hz, as shown in <a href="#fig-oscilloscope-results" class="quarto-xref">Figure&nbsp;8</a>.</p>
+<details>
+<summary>
+<b>Click to Expand to see Oscilloscope Measurement of LED 2 Blinking Frequency</b>
+</summary>
+<div id="fig-oscilloscope-results" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-oscilloscope-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\IMG_8802.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-oscilloscope-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Oscilloscope Measurement of LED 2 Blinking Frequency
+</figcaption>
+</figure>
+</div>
+</details>
+<p>Overall, the simulation and hardware testing demonstrated that the design met the functional requirements of the lab. The use of parameterized counter width and maximum count also allows the counter to be easily modified for faster simulation or different output frequencies without changing the underlying counter logic.</p>
+<div id="fig-top-tb-results" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-top-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images\lab1_JI_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-top-tb-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Top-Level Testbench Simulation Results
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<p>The design successfully implemented all required functionality, including the four-bit DIP switch inputs, hexadecimal display on the common-anode seven-segement display, the two switch-controlled LEDs, and the blinking LED driven by the FPGA’s on-board high speed oscillator. The design was tested using automatic SystemVerilog testbenches and QuestaSim waveforms, and the hardware was used to verify the required display and LED behavior. <strong>I spent 20 hours working on this lab</strong>.</p>
+</section>
+<section id="ai-prototype-summary" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> AI Prototype Summary</h1>
+<details>
+<summary>
+<b>Click to Expand to see the AI generated code for the 2 Hz blink</b>
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode systemverilog code-with-copy"><code class="sourceCode systemverilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top (</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> led</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Internal clock signal</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> clk;</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Instantiate the iCE40 UltraPlus High-Frequency Oscillator</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">// CLKHF_DIV: "0b00" = 48 MHz, "0b01" = 24 MHz, "0b10" = 12 MHz, "0b11" = 6 MHz</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    HSOSC #(</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        .CLKHF_DIV(<span class="st">"0b00"</span>) </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    ) hfosc_inst (</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        .CLKHFEN (<span class="bn">1'b1</span>), <span class="co">// Enable clock output</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        .CLKHFPU (<span class="bn">1'b1</span>), <span class="co">// Power up the oscillator</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        .CLKHF   (clk)   <span class="co">// Connect to our internal logic clock</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Math for a 2 Hz blink rate (0.5 second period):</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// To achieve a 2 Hz blink, the LED must toggle every 0.25 seconds.</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 48,000,000 cycles/sec * 0.25 sec = 12,000,000 cycles.</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">localparam</span> <span class="kw">int</span> TOGGLE_COUNT = <span class="dv">12</span>_000_000;</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 24-bit counter is enough to hold 12,000,000</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">23</span>:<span class="dv">0</span>] counter = '<span class="dv">0</span>; </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span>        led_reg = '<span class="dv">0</span>;</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Sequential logic for the counter and LED toggle</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_ff</span> @(<span class="kw">posedge</span> clk) <span class="kw">begin</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> (counter == TOGGLE_COUNT - <span class="dv">1</span>) <span class="kw">begin</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            counter &lt;= '<span class="dv">0</span>;</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            led_reg &lt;= ~led_reg;</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            counter &lt;= counter + <span class="bn">1'b1</span>;</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Drive the output port</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> led = led_reg;</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<p>I think that the LLM’s output quality is pretty good, especially because we just made something very similar and also made a counter in E85. Thus, there wasn’t really any syntax that it used that was unknown, but I did like how it had good comments telling me what each part of the code did. The LLM also briefly explained some of the math behind how the counter worked and was even able to explain the different clock divisions available for the internal oscillator, which I thought was a good addition. The code worked on the first attempt and synthesized successfully without any issues.</p>
+<p>I think the main reason I was able to evaluate the quality of the LLM’s output is that I already understood what the solution should look like. I knew how counters work, what the different SystemVerilog functions were doing, like <code>always_ff</code>, and how those parts should transform into a LED blinking at the desired frequency. If I didn’t already have that background knowledge, I would have a much harder time determining whether the LLM’s solution was actually correct or just looked reasonable. This made me realize that there can be a significant difference between being able to generate code with an LLM and actually understanding and evaluating the code that it produces</p>
+<p>The next time that I use an LLM, I think it would be useful for generating basic submodules such as a counter, an adder, or another component that we have had extensive practice designing ourselves. These are situations where I can independently determine whether the generated code is working correctly. I also think an LLM could be especially useful in understanding and interpreting error messages or issues that are poorly documented or difficult to interpret. An LLM could help explain what an error means and suggest possible changes which I could then evaluate based on my understanding of the system and determine whether the change would actually fix the problem or potentially introduce another issue.</p>
+<p>The biggest benefit that I can see is the potential time saving. Even though I know how to make something like an LED blinker myself, the LLM was able to produce a working solution in only a few seconds. However, I think it is important to use that speed without becoming dependent on it. Overall, I think LLMs can be a very useful tool for engineering design and programming, but the tool is only as good as its user, so it’s important to be using it alongside an understanding of the underlying concepts to independently evaluate the output.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,65 @@
+[
+  {
+    "objectID": "labs/lab1/lab1.html",
+    "href": "labs/lab1/lab1.html",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "",
+    "text": "In this lab, I assembled and varified the hardware (custom PCB board, MCU and FPGA boards),designed and simulated FPGA logic, programmed it onto the board, created testbenches to verify each individual module as well as the complete top-level design, programmed the design onto the FPGA, and experimentally confirmed that the LEDs and 7-segment display worked as specified."
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#hardware-design",
+    "href": "labs/lab1/lab1.html#hardware-design",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "2.1 Hardware Design",
+    "text": "2.1 Hardware Design\nThe hardware consists of the FPGA development board, four DIP switches, three LEDs and a common anode seven-segement display. the four DIP switches provide the four-bit input to the FPGA, with adjacent switches corresponding to adjacent bits from s[0] to s[3]. The switches are used to select the hexadecimal value displayed on the seven-segment display and to control the two logic-operation LEDs.\nThe seven-segement display is connected using one FPGA output for each of the seven segements. Since the display is common-anode, its common anode connection is tied to the 3.3V and the FPGA GPIO pins are connected to the individual sgement cathodes. A logic low therefore causes the segment to illuminate. Each segment has its own current limiting resistor to keep the LED current within the recommended operating range. Using individual resistors also helps ensure that the segments have consistent brightness regardless of how many segements are illumninated\n\n\nClick to expand Calculations for Resistor Value\n\n\n\n\n\n\n\nFigure 1: Calculations for a single LED in the seven-segment display\n\n\n\n\n\n\nClick to expand Theory for Equal Illumination\n\n\n\n\n\n\n\nFigure 2: Theory of design for equal illumination\n\n\n\n\nThree LEDs are connected to the FPGA outputs that correspond to led[0] led[1] and led[2]. The first two LEDs implement the required logic functions from the DIP switches, while the third LED is driven by the counter and flashes at 2.4Hz. The FPGA’s internal high speed oscillator (HSOSC) supplies the clock for the counter, so no external clock signal is required.\n\n\nClick to expand Calculation for Counter value for 2.4Hz blink rate\n\n\n\n\n\n\n\nFigure 3: Calculation for Counter value for 2.4Hz blink rate"
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#verilog-design",
+    "href": "labs/lab1/lab1.html#verilog-design",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "2.2 Verilog Design",
+    "text": "2.2 Verilog Design\nThe verilog design was divided into a seven-segment decoder and a counter, with the switch-to-LED logic implemented directly in the top-level module. The seven-segment decoder uses a combinational case statement to map each of the sixteen possible four-bit inputs into a unique seven-segement pattern representative of the number/letter represented in hexadecimal. The decoder provides distinct shapes for all hexadecimal values from 0x0 through 0xF.\nThe counter is implemnted in its own module using a single always_ff block. It includes reset, enable, and maximm count functionality. When reset is asserted, the counter and blink output are cleared. When enable is asserted, the counter increments on each rsing edge of the oscillator clck. When the counter reaches its maximum vaue, it returns to zero and toggles blink output. The counter uses parameters for both its width and maximum count, allowing a small counter to be used during simulation while the full-size cunter is used for the hardware implementation.\nThe switch-to-LED operations are implemented directly in the top-level-module using assign statements. This follows the required structure while keeping the top-level design simple. the top-level module consits of the HSOSC and instantiations of the counter and the seven-segement decoder\nFor the flashing LED, te counter was sized based on the oscillator frequency and required flashing frequency. With a 48MHz clock and a desired LED frequency of 2.4Hz, the LED must complete one full on/off cycle at that frequency. Since the blink output toggles twice during each cycle, it must toggle at a frequency two times 2.4Hz. Therefore, the counter requires\n\\[\n\\begin{aligned}\n48\\,\\text{MHz} &= 48{,}000{,}000\\,\\text{Hz} \\\\\n\\text{counter value} &= \\frac{48{,}000{,}000\\,\\text{Hz}}{2 \\times 2.4\\,\\text{Hz}} \\\\\n\\text{counter value} &= 10{,}000{,}000\n\\end{aligned}\n\\]\nclock cycles between toggles. The counter therefore counts from 0 through 9,999,999 before toggling the LED. A 24-bit counter is sufficent becuase it can represent values up to 16,777,215."
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#testing",
+    "href": "labs/lab1/lab1.html#testing",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "2.3 Testing",
+    "text": "2.3 Testing\nEach functional portion of the design was tested independently using automatic SystemVerilog testbenches in QuestSim before testing the complete top-level design.\nThe seven-segement decoder testbench tests all sixteen possible four-bit inputs. For each input, an assertion compared the decoder output against the expected seven-segement pattern. This demonstrates that all hexadecimal digits from 0x0 through 0xF are implemented correctly.\nThe counter testbench used a small parameterized maximum count so that its behavior could be observed quickly in simulation. The testbench verified each required counter feature. Reset was checked to ensure that the counter returned to zero, enable was checked to ensure that the counter stopped when disabled and resumed when enabled, and the maximum count behavior was checked to ensure that the counter returned to zero and toggled the blink output when the maximum value was reached. These tests demonstrate the required sequential behavior without requiring millions of clock cycles to be simulated (much faster and easier to confirm the counter is working).\nThe top-level testbench was designed to test functionality that was not already covered by the module-level testbenches. Becasue top-level module generates its clock internally using HSOSC, the test bench does not provide an external clock. Instead, the testbench observes the internal oscillator and verifies that it produces clock activity. The top-level testbench also verifies that the seven-segement decoder is correctly connected to the top-level seg output, that the switch-to-LED assign statements produce the correct outputs, and that the counter’s blink output is correctly connected to led[2]."
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#block-diagram",
+    "href": "labs/lab1/lab1.html#block-diagram",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "3.1 Block Diagram",
+    "text": "3.1 Block Diagram\n\n\n\n\n\n\nFigure 4: Block diagram of the Verilog design\n\n\n\nThe block diagram in Figure 4 demonstrates the overall architecture of the Verilog design. The top-level module lab1_JI includes three submodules, the high-speed oscillator (HSOSC), the seven-segment display(lab1_seven_segment), and the counter (lab1_counter). The top-level module also contains the XOR and AND gates used to control led[0] and led[1], respectively.\nThe internal oscillator generates the int_osc clock signal, which is connected to the clk input of the blink_counter instance. The counter generates the blink signal, which is connected to led[2]. The switch input s[3:0] is connected to the seven_segment instance and is also used as inputs to the XOR and AND gates. The ’ seven_segment ’ decoder produces the seg[6:0] output. All module ports and internal nets are labeled, including the internal inc_osc and blink signals, and multi-bit signals are represented using bus notation like s[3:0]."
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#schematic",
+    "href": "labs/lab1/lab1.html#schematic",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "3.2 Schematic",
+    "text": "3.2 Schematic\n\n\n\n\n\n\nFigure 5: Schematic of FPGA Hardware interface Schematic\n\n\n\nFigure 5 shows the physical eletrical connections between the UPduino FPGA to the four DIP switches and three LEDs connected through the custom PCB board. The schematic also shows the external connection to the common anode seven segment display. The DIP switches provide the four bit input to the FPGA, while the FPGA outputs drive the three LEDs and seven-segement display. Each LED and seven-segement segment is connected through its own current-limiting resistor to limit the ouotput current and prevent excessive loading of the FPGA I/O pins. The seven-segement display is common-anode, so its anode is connected to 3.3V and the FPGA drives the individual cathoes low to illuminate the corresponding segements. The Schematic also labels the FPGA pin assignments and their corresponding variables in the SystemVerilog code, component values, and power and ground connections used to construct the circuit."
+  },
+  {
+    "objectID": "labs/lab1/lab1.html#testbench-simulation",
+    "href": "labs/lab1/lab1.html#testbench-simulation",
+    "title": "Lab 1: FPGA and MCU Setup and Testing",
+    "section": "4.1 Testbench simulation",
+    "text": "4.1 Testbench simulation\nThe design was tested using QuestaSim with separate testbenches for the seven-segment decoder, counter, and top-level module. The seven-segment testbench verified all sixteen possible switch combinations and confirmed that each hexadecimal value produced the expected segment pattern as shown in Figure 6.\n\n\n\n\n\n\nFigure 6: Seven-Segment Decoder Testbench Simulation Results\n\n\n\nThe counter testbench verified that reset set the counter to 0, enable = 1 started the counter, enable = 0 stopped the counter, and the counter wrapped back to 0 when it reached the maximum count. A reduced counter size was used to make the simulation faster. The expected waveforms showing this working can be seen in Figure 7\n\n\n\n\n\n\nFigure 7: Counter Testbench Simulation Results\n\n\n\nThe top-level testbench verified the connections between modules, including the seven-segment decoder output and the segments of the seven-segment display (s[0]-s[6]) and the counter output connected to led [2]. It also verified the combinational logic for led [0] and led[1] across all sixteen switch combinations since that wasn’t tested in any other testbench. Figure 9 shows the resulting QuestaSim waveforms, where the counter increments, wraps back to zero at the maximum count, and toggles the blink output. led [2] follows the blink signal as expected.\nFor the physical design, the internal HSOSC was configured for its nominal 48 MHz output. To achieve the required 2.4 Hz blinking frequency, led [2] must toggle at this rate, corresponding to 10,000,000 clock cycles. Therefore, the counter was configured with a maximum count of 9,999,999. A 24-bit counter is sufficient because it can represent values up to 16,777,215.\nThis calculated frequency was futher conofimed experimentally by temporarily connecting led[2] to FPGA pin P44 and measuring the output signal with an oscilloscope. The measured waveform had a frequency of 2.4 Hz, as shown in Figure 8.\n\n\nClick to Expand to see Oscilloscope Measurement of LED 2 Blinking Frequency\n\n\n\n\n\n\n\nFigure 8: Oscilloscope Measurement of LED 2 Blinking Frequency\n\n\n\n\nOverall, the simulation and hardware testing demonstrated that the design met the functional requirements of the lab. The use of parameterized counter width and maximum count also allows the counter to be easily modified for faster simulation or different output frequencies without changing the underlying counter logic.\n\n\n\n\n\n\nFigure 9: Top-Level Testbench Simulation Results"
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "E155 Blog",
+    "section": "",
+    "text": "filler text for now\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nHello Quarto\n\n\nWelcome to my Quarto portfolio\n\n\n\n\n\nSep 1, 2026\n\n\nJoshua Ikehara\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "E155 Porfolio",
+    "section": "",
+    "text": "Joshua Ikehara is a senior Engineering student at Harvey Mudd College with a focus in Electrical Engineering. He enjoy hands-on problem solving, learning how things work, and taking on challenging projects. Outside of academics, He’s involved in research, engineering projects, mentoring, and volleyball. He’s especially interested in aerospace and technology and enjoy opportunities to learn, build, and work with others."
+  }
+]
