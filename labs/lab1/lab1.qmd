@@ -40,7 +40,7 @@ of how many segements are illumninated
 <details>
 <summary><b>Click to expand Theory for Equal Illumination</b></summary>
 
-![Theory of design for equal illumination](images/2B2A7548-97DB-4419-ABA8-55E3174C20FE.jpg){#fig-led-equal-illumination fig-align="center"}
+![Theory of design for equal illumination](images\IMG_3034.jpg){#fig-led-equal-illumination fig-align="center"}
 
 </details>
 
@@ -124,7 +124,7 @@ the `seg[6:0]` output. All module ports and internal nets are labeled, including
 signals are represented using bus notation like `s[3:0]`.
 
 ## Schematic
-![Schematic of FPGA Hardware interface Schematic](images\IMG_3030.png){#fig-FPGA-hardware-interface fig-align="center"}
+![Schematic of FPGA Hardware interface Schematic](images\Finalized schematic.jpg){#fig-FPGA-hardware-interface fig-align="center"}
 
 @fig-FPGA-hardware-interface shows the physical eletrical connections between the UPduino FPGA to the four DIP switches and
 three LEDs connected through the custom PCB board. The schematic also shows the external connection to the common anode seven 
