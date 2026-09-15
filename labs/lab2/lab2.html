@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Joshua Ikehara">
+<meta name="dcterms.date" content="2026-09-07">
 
-<title>lab2 – E155 Porfolio</title>
+<title>Lab 2: Multiplexed 7-Segment Display – E155 Porfolio</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +27,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -74,6 +111,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -153,17 +219,536 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology"><span class="header-section-number">2</span> Design and Testing Methodology</a>
+  <ul class="collapse">
+  <li><a href="#build-1-multiplexed-seven-segment-display" id="toc-build-1-multiplexed-seven-segment-display" class="nav-link" data-scroll-target="#build-1-multiplexed-seven-segment-display"><span class="header-section-number">2.1</span> Build 1: Multiplexed Seven-Segment display</a></li>
+  <li><a href="#build-2-keypad-scanning" id="toc-build-2-keypad-scanning" class="nav-link" data-scroll-target="#build-2-keypad-scanning"><span class="header-section-number">2.2</span> Build 2: Keypad scanning</a></li>
+  </ul></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation"><span class="header-section-number">3</span> Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#build-1-seven-segment-display-block-diagram" id="toc-build-1-seven-segment-display-block-diagram" class="nav-link" data-scroll-target="#build-1-seven-segment-display-block-diagram"><span class="header-section-number">3.1</span> Build 1: Seven-Segment Display Block Diagram</a></li>
+  <li><a href="#build-2-keypad-scanner-block-diagram" id="toc-build-2-keypad-scanner-block-diagram" class="nav-link" data-scroll-target="#build-2-keypad-scanner-block-diagram"><span class="header-section-number">3.2</span> Build 2: Keypad Scanner Block Diagram</a></li>
+  <li><a href="#build-1-seven-segment-display-schematics" id="toc-build-1-seven-segment-display-schematics" class="nav-link" data-scroll-target="#build-1-seven-segment-display-schematics"><span class="header-section-number">3.3</span> Build 1: Seven-Segment Display Schematics</a></li>
+  <li><a href="#build-2-keypad-scanner-display-schematics" id="toc-build-2-keypad-scanner-display-schematics" class="nav-link" data-scroll-target="#build-2-keypad-scanner-display-schematics"><span class="header-section-number">3.4</span> Build 2: Keypad Scanner Display Schematics</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion"><span class="header-section-number">4</span> Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#build-1-seven-segment-display" id="toc-build-1-seven-segment-display" class="nav-link" data-scroll-target="#build-1-seven-segment-display"><span class="header-section-number">4.1</span> Build 1: Seven-Segment Display</a></li>
+  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation"><span class="header-section-number">4.2</span> Testbench Simulation</a></li>
+  <li><a href="#build-2-keypad-scanner" id="toc-build-2-keypad-scanner" class="nav-link" data-scroll-target="#build-2-keypad-scanner"><span class="header-section-number">4.3</span> Build 2: Keypad Scanner</a></li>
+  <li><a href="#testbench-simulation-1" id="toc-testbench-simulation-1" class="nav-link" data-scroll-target="#testbench-simulation-1"><span class="header-section-number">4.4</span> Testbench Simulation</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary"><span class="header-section-number">6</span> AI Prototype Summary</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 2: Multiplexed 7-Segment Display</h1>
+<p class="subtitle lead">Hours Taken: 18 hours</p>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Ikehara </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 7, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
 
 
+</header>
 
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In this lab, a multiplexed two-digit seven-segment display and a four-row keypad scanning circuit were implemented on the FPGA. The design builds on the counter and seven_segment_decoder modules developed in Lab 1 and demonstrates how existing modules can be reused to construct a larger system. A single seven-segment decoder was time multiplexed between two hexadecimal inputs, while a separate counter-based scanning circuit sequentially activated the four keypad rows. The keypad column inputs were also inverted(since a column output was low-active while the LED output was high-active) and displayed on LEDs to provide a visual indication of the signals detected by the FPGA.</p>
+<p>The design uses the FPGA’s high-speed oscillator (HSOSC) as the system clock. Parameterized instances of Lab 1 counter were used for both the display multiplexing and keypad scanning circuits. The design was simulated in QuestaSim using automatic testbenches for both the scanning module and time multiplex display and their corresponding top-level module before being tested on the physical FPGA hardware.</p>
+</section>
+<section id="design-and-testing-methodology" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Design and Testing Methodology</h1>
+<p>The lab was approached as two separate hardware builds. The first build focused on multiplexing the seven-segment displays, while the second focused on scanning the keypad and displaying its column signals on LEDs. For both builds, the FPGA’s high-speed oscillator (HSOSC) was used as the clock source, and the counter from Lab 1 was reused rather than implementing counters directly inside the new modules.</p>
+<section id="build-1-multiplexed-seven-segment-display" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="build-1-multiplexed-seven-segment-display"><span class="header-section-number">2.1</span> Build 1: Multiplexed Seven-Segment display</h2>
+<p>The first build implemented a two-digit hexadecimal display using only a single instance of <code>lab1_seven_segment</code> decoder. A parameterized counter was used to periodically switch between the two hexadecimal inputs. The resulting <code>digit_select</code> signal controls which display is active and determines which hexadecimal value is passed to the decoder. The display is therefore time multiplexed. Only one digit is driven at a time, but the switching occurs rapidly enough that both digits appear continuously illuminated to the observer. The counter parameters were selected to produce the required multiplexing frequency on the physical FPGA.</p>
+<details>
+<summary>
+<b>Click to expand Calculations for the sufficently quick multiplexing frequency</b>
+</summary>
+<p>Since the FPGA clck operates at a frequency of <span class="math inline">\(48~\text{MHz}\)</span>, the corresponding clock period is: <span class="math display">\[
+T_{clk} = \frac{1}{f_{clk}}
+= \frac{1}{48\times10^6}
+\approx 20.83~\text{ns}.
+\]</span> The seven-segment display was multiplexed at a frequency of <span class="math inline">\(1~\text{kHz}\)</span>. Therefore, the multiplexing period is</p>
+<p><span class="math display">\[
+T_{mux} = \frac{1}{f_{mux}}
+= \frac{1}{1000}
+= 1~\text{ms}.
+\]</span></p>
+<p>The number of FPGA clock cycles required for one complete multiplexing period is</p>
+<p><span class="math display">\[
+N_{mux} = \frac{f_{clk}}{f_{mux}}
+= \frac{48\times10^6}{1000}
+= 48{,}000~\text{cycles}.
+\]</span> Since the two displays are alternated during each multiplexing period, each display is active for half of the period:</p>
+<p>$$ T_{digit} = = = 0.5~.</p>
+<p>This corresponds to half of the multiplexing counter’s total count:</p>
+<p><span class="math display">\[
+N_{half} = \frac{N_{mux}}{2}
+= \frac{48{,}000~\text{cycles}}{2}
+= 24{,}000~\text{cycles}.
+\]</span></p>
+<p>Thus, each display has a <span class="math inline">\(50\%\)</span> duty cycle and is refreshed at <span class="math inline">\(1~\text{kHz}\)</span>. Which should be faster than the human eye can see and still have enough time for the physical system to change without bleeding or flickering to meet the specs.</p>
+</details>
+<p>For simulation, the counter parameters were reduced so that the display could switch between two digits within a short simulation. The testbench verified that each hexadecimal input was sent to the decoder when its corresponding display was selected and that reset returned the multiplexing circuit to its initial state.</p>
+<p>The seven-segment display was driven using PNP transistors as a source switch. Each FPGA control output was connected through a <span class="math inline">\(1~\text{k}\Omega\)</span> resistor to the base of a PNP transistor. The emitter of the transistor was connected to the <span class="math inline">\(3.3~\text{V}\)</span> supply, while the collector supplied the common-anode connection of the display. The individual LED segments were then connected through a current-limiting resistor back to an FPGA GPIO output.</p>
+<p>The <span class="math inline">\(1~\text{k}\Omega\)</span> base resistor was selected to provide sufficient base current to drive the PNP transistor into saturation while limiting the current drawn from the FPGA GPIO.</p>
+<details>
+<summary>
+<b>Click to expand Calculations for the current limiting resistors for both the Base and LED display</b>
+</summary>
+<p>The base current was calculated from the voltage across the base-emitter junction:</p>
+<p><span class="math display">\[
+I_B =
+\frac{V_{CC}-V_{OL(max)}-V_{BE(sat)}}{R_B}=\frac{3.3V-0.4V-0.75V}{2.15 mA}=1k\Omega
+\]</span></p>
+<p>where <span class="math inline">\(V_{CC}=3.3~\text{V}\)</span>, <span class="math inline">\(R_B=1~\text{k}\Omega\)</span>, <span class="math inline">\(V_{OL(max)}=0.4V\)</span>, and <span class="math inline">\(V_{BE(sat)}=0.75V\)</span> was taken from the GPIO datasheet <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a> and transistor datasheet <a href="#fig-pnp-transistor-graph" class="quarto-xref">Figure&nbsp;2</a> The calculated base respectively. The FPGA’s <span class="math inline">\(V_{OL,\max}\)</span> value was used rather than <span class="math inline">\(V_{OL,\min}\)</span>. Since the PNP transistor turns on when the FPGA output pulls the base low, the highest possible low-level output voltage produces the smallest voltage across the base resistor and therefore the smallest base current. Using <span class="math inline">\(V_{OL,\max}\)</span> provides a worst-case check that there is still sufficient base current to saturate the transistor under all guaranteed FPGA output conditions.</p>
+<div id="fig-GPIO-datasheet" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-GPIO-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/GPIO_table.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-GPIO-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Datasheet of the GPIOs from the FPGA
+</figcaption>
+</figure>
+</div>
+<div id="fig-pnp-transistor-graph" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pnp-transistor-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/pnp_transistor_graph.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pnp-transistor-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: PNP Transistor datasheet 2N3906
+</figcaption>
+</figure>
+</div>
+<p>Current was then compared with the required collector current to verify that the transistor would remain saturated. A target collector current of approximately <span class="math inline">\(14~\text{mA}\)</span> was selected for the LED segments to provide sufficient brightness while remaining within the display’s recommended operating range. The required LED current-limiting resistor was calculated using the transistor saturation voltage and the LED forward voltage:</p>
+<p><span class="math display">\[
+R_{LED} =
+\frac{V_{CC}-V_{CE(sat)}-V_F}{I_C}.
+=\frac {3.3V-0.1V-1.8V}{14 mA}=100 \Omega
+\]</span></p>
+<p>The LED forward voltage, <span class="math inline">\(V_F\)</span>, was obtained from the seven-segment display datasheet using the forward-current versus forward-voltage characteristic graph seen in <a href="#fig-led-datasheet" class="quarto-xref">Figure&nbsp;3</a> at approximately <span class="math inline">\(14~\text{mA}\)</span>. Using the resulting forward voltage and the target collector current gave a required resistance of approximately <span class="math inline">\(100~\Omega\)</span>. The selected <span class="math inline">\(100~\Omega\)</span> resistor therefore limits the LED current to approximately the desired operating current.</p>
+<div id="fig-led-datasheet" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-led-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/led_graph.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-led-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Dual 7 Segment LED Display Datasheet for Forward Current and Voltage Characterization
+</figcaption>
+</figure>
+</div>
+<p>Finally, the PNP transistor was checked for saturation using a conservative forced current gain of 10. The resulting ratio was calculated as</p>
+<p><span class="math display">\[
+\frac{I_C}{I_B}&lt;10 \rightarrow \frac{14 mA}{2.15 mA}=6.51 mA &lt; 10 mA
+\]</span></p>
+Since the calculated collector-to-base current ratio was below 10, the available base current was sufficient to drive the transistor into saturation at the desired LED current. This ensured that the transistor operated as an effective high-side switch while keeping the FPGA output current within its required limits.
+</details>
+</section>
+<section id="build-2-keypad-scanning" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="build-2-keypad-scanning"><span class="header-section-number">2.2</span> Build 2: Keypad scanning</h2>
+<p>The second build implemented the keypad scanning circuit separately from the seven-segment display. A parameterized instance of Lab 1’s counter generates the scanning timing</p>
+<details>
+<summary>
+<b>Click to expand Calculations for the Rate of Toggling the Active row </b>
+</summary>
+<p>if the rows are:</p>
+<p><span class="math display">\[
+1000 \rightarrow 0100 \rightarrow 0010 \rightarrow 0001 \rightarrow 1000
+\]</span></p>
+<p>The keypad scanning circuit cycles through the four row outputs at a rate of <span class="math inline">\(2~\text{Hz}\)</span>. Therefore, the full scanning period is</p>
+<p><span class="math display">\[
+T_{\text{scan}}=\frac{1}{2~\text{Hz}}=0.5~\text{s}.
+\]</span></p>
+<p>With a <span class="math inline">\(48~\text{MHz}\)</span> FPGA clock, this requires</p>
+<p><span class="math display">\[
+N_{\text{scan}}=(48\times10^6)(0.5)
+=24{,}000{,}000~\text{cycles}.
+\]</span></p>
+<p>Since the four rows are active sequentially, each row is active for</p>
+<p><span class="math display">\[
+N_{\text{row}}=\frac{24{,}000{,}000}{4}
+=6{,}000{,}000~\text{cycles}.
+\]</span></p>
+<p>The counter was therefore parameterized with a maximum count of <span class="math inline">\(23{,}999{,}999\)</span>, with row transitions occurring at <span class="math inline">\(5{,}999{,}999\)</span>, <span class="math inline">\(11{,}999{,}999\)</span>, and <span class="math inline">\(17{,}999{,}999\)</span> cycles.</p>
+</details>
+<p>Assignment statements convert the counter output into four one-hot keypad row signals <span class="math display">\[
+1000 \rightarrow 0100 \rightarrow 0010 \rightarrow 0001 \rightarrow 1000
+\]</span> Each row is activated sequentially as the counter progresses through its predefined ranges. The scanning module also supports both reset and enable functionality. The four column inputs are connected to the LEDs through an inverter, since the columns are LOW-Active and the LEDs are high-active, thus allowing the column activity to be directly observed in the LEDs.</p>
+<p>The keypad rows were implemented using <span class="math inline">\(2N3904\)</span> NPN transistors as open-collector outputs. When a row is selected every 2 Hz, the FPGA GPIO drives the transistor’s base HIGH, causing the transistor to pull the keypad row to ground and holding the column LOW. A <span class="math inline">\(10~\text{k}\Omega\)</span> pull-up resistor on each column holds the column HIGH when no key is pressed.</p>
+<p>The base resistor was selected to limit the current supplied by the FPGA GPIO. Using the minimum guaranteed FPGA HIGH output voltage gives the worst-case base current to ensure that it is saturated at all times.</p>
+<details>
+<summary>
+<b>Click to expand Calculations for current limiting resistors </b>
+</summary>
+<p>To find the base current coming from the GPIO to the NPN transistor, we can use the following equation: <span class="math display">\[
+I_B=\frac{V_{OH,\min}-V_{BE(sat)}}{R_B}
+\approx 2.25~\text{mA}.
+\]</span></p>
+<p>Where <span class="math inline">\(V_{OH,\min}=3.3V-0.4V\)</span> as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a> and that is about <span class="math inline">\(V_{BE(sat)}=0.65\)</span> for a <span class="math inline">\(I_c=0.31mA\)</span> as seen in <a href="#fig-npn-datasheet" class="quarto-xref">Figure&nbsp;5</a>. We also see that the maximum current being drawn at the output is <span class="math inline">\(2.25 mA\)</span> which is well within the 8 mA max, as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a>. The maximum collector current is limited by the <span class="math inline">\(10~\text{k}\Omega\)</span> column pull-up resistor:</p>
+<p><span class="math display">\[
+I_C=\frac{V_{CC}-V_{CE(sat)}}{10~\text{k}\Omega}
+\approx 0.32~\text{mA}.
+\]</span></p>
+<p>Where <span class="math inline">\(V_{CC}=3.3 V\)</span>,<span class="math inline">\(V_{CE(sat)}=0.1 V\)</span> as seen in. The transistor was checked for saturation using a conservative forced current gain of 10:</p>
+<p><span class="math display">\[
+\frac{I_C}{I_B}
+=\frac{0.32~\text{mA}}{2.25~\text{mA}}
+\approx0.142&lt;10.
+\]</span></p>
+<p>Thus, the available base current is more than sufficient to saturate the transistor. With the transistor saturated, the row voltage is approximately <span class="math inline">\(V_{CE(sat)}=0.1~\text{V}\)</span> as seen in <a href="#fig-npn-datasheet" class="quarto-xref">Figure&nbsp;5</a>. This is below the FPGA’s maximum guaranteed LOW input voltage, <span class="math inline">\(V_{IL,\max}=0.8~\text{V}\)</span> as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a>, so the FPGA reliably recognizes the pressed-key state as LOW.</p>
+<p>When no key is pressed, the <span class="math inline">\(10~\text{k}\Omega\)</span> pull-up resistor brings the column to approximately <span class="math inline">\(3.3~\text{V}\)</span>. This is above the FPGA’s minimum guaranteed HIGH input voltage, <span class="math inline">\(V_{IH,\min}=2.0V\)</span>, ensuring that the column is reliably read as HIGH when inactive. The pull-up resistor also limits the current when the NPN transistor pulls the column LOW, making the open-collector configuration tolerant of multiple simultaneous key presses.</p>
+<div id="fig-npn-datasheet" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-npn-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/npn_transistor.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-npn-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: npn transister datasheet
+</figcaption>
+</figure>
+</div>
+</details>
+<p>A similar calculation was performed for the single LED indicator that wasn’t already on the board. The LED was connected to the <span class="math inline">\(3.3~\text{V}\)</span> supply through a <span class="math inline">\(10~\text{k}\Omega\)</span> resistor, with a <span class="math inline">\(2N3904\)</span> NPN transistor used as a way to connect it to ground. The transistor base was controlled by an FPGA GPIO through a <span class="math inline">\(1~\text{k}\Omega\)</span> resistor. The base current was calculated using the minimum guaranteed GPIO HIGH voltage and <span class="math inline">\(V_{BE(sat)}\)</span> to verify sufficient drive current. The collector current was then determined from the <span class="math inline">\(10~\text{k}\Omega\)</span> LED resistor and the LED forward voltage. Finally, the ratio <span class="math inline">\(I_C/I_B\)</span> was checked to ensure it remained below the forced gain of 10, confirming that the transistor would operate in saturation while limiting the LED current.</p>
+<details>
+<summary>
+<b>Click to expand Calculations for current limiting resistors for the one LED</b>
+</summary>
+<p>To find the base current coming from the GPIO to the NPN transistor, we can use the following equation: <span class="math display">\[
+I_B=\frac{V_{OH,\min}-V_{BE(sat)}}{R_B}
+\approx 2.25~\text{mA}.
+\]</span></p>
+<p>Where <span class="math inline">\(V_{OH,\min}=3.3V-0.4V\)</span> as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a> and that is about <span class="math inline">\(V_{BE(sat)}=0.75\)</span> for a <span class="math inline">\(I_c=10mA\)</span> as seen in <a href="#fig-npn-datasheet" class="quarto-xref">Figure&nbsp;5</a>. We also see that the maximum current being drawn at the output is <span class="math inline">\(2.25 mA\)</span>, which is well within the <span class="math inline">\(8 mA\)</span> max as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a>. Now, we want to find the current of the collector to ensure that the transistor is still saturated.</p>
+<p><span class="math display">\[
+I_C=\frac{V_{CC}-V_{CE(sat)}-V_{F(LED)}}{120\Omega}
+\approx 10~\text{mA}.
+\]</span></p>
+<p>Where <span class="math inline">\(V_{CC}=3.3 V\)</span>,<span class="math inline">\(V_{CE(sat)}=0.1 V\)</span>, and <span class="math inline">\(V_{F(LED)}=2.06\)</span> as seen in <span class="citation" data-cites="led-2">@led-2</span>. The transistor was checked for saturation using a conservative forced current gain of 10:</p>
+<div id="led-2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/led_2.jpg" class="img-fluid figure-img"></p>
+<figcaption>LED datasheet</figcaption>
+</figure>
+</div>
+<p><span class="math display">\[
+\frac{I_C}{I_B}
+=\frac{0.32~\text{mA}}{2.25~\text{mA}}
+\approx0.142&lt;10.
+\]</span></p>
+<p>Thus, the available base current is more than sufficient to saturate the transistor. With the transistor saturated, the row voltage is approximately <span class="math inline">\(V_{CE(sat)}=0.1~\text{V}\)</span> as seen in <a href="#fig-npn-datasheet" class="quarto-xref">Figure&nbsp;5</a>. This is below the FPGA’s maximum guaranteed LOW input voltage, <span class="math inline">\(V_{IL,\max}=0.8~\text{V}\)</span> as seen in <a href="#fig-GPIO-datasheet" class="quarto-xref">Figure&nbsp;1</a>, so the FPGA reliably recognizes the pressed-key state as LOW.</p>
+<p>When no key is pressed, the <span class="math inline">\(10~\text{k}\Omega\)</span> pull-up resistor brings the column to approximately <span class="math inline">\(3.3~\text{V}\)</span>. This is above the FPGA’s minimum guaranteed HIGH input voltage, <span class="math inline">\(V_{IH,\min}=2.0V\)</span>, ensuring that the column is reliably read as HIGH when inactive. The pull-up resistor also limits the current when the NPN transistor pulls the column LOW, making the open-collector configuration tolerant of multiple simultaneous key presses.</p>
+<div id="fig-npn-datasheet" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-npn-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/npn_transistor.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-npn-datasheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: npn transister datasheet
+</figcaption>
+</figure>
+</div>
+</details>
+<p>For simulation, the scanning counter parameters were also reduced so that each row remained active for only a few clock cycles. This allowed the complete scanning sequence to be tested quickly while the physical hardware retained the parameters required for the intended scanning rate. ## Simulation Testing</p>
+<p>Separate automatic testbenches were used to verify the two builds. The scanning testbench demonstrated all four row outputs, transitions between rows, counter wraparound, reset, and enable behavior. The top-level keypad testbench additionally verified that the column inputs were correctly represented on the LEDs.</p>
+<p>The seven-segment build was tested separately to verify the multiplexing behavior and correct display of the two hexadecimal inputs. No separate simulations of the Lab 1 counter or seven-segment decoder were performed because those modules had already been verified in the previous lab.</p>
+</section>
+</section>
+<section id="technical-documentation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Technical Documentation</h1>
+<p>The source code for both Lab 2 builds can be found in the associated GitHub repository</p>
+<p><a href="https://github.com/joshuaikehara/e155-lab1/tree/main/lab2_JI/source/impl_1">Build 1: Dual 7 segment display</a></p>
+<p><a href="https://github.com/joshuaikehara/e155-lab1/tree/main/lab2_part2_JI/source/impl_1">Build 2: Keypad scanner</a></p>
+<section id="build-1-seven-segment-display-block-diagram" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="build-1-seven-segment-display-block-diagram"><span class="header-section-number">3.1</span> Build 1: Seven-Segment Display Block Diagram</h2>
+<p>The first build uses the HSOSC as the clock source, which drives the parameterized multiplexing counter. The counter generates the <code>digit_select</code> signal used to select between the two hexadecimal inputs. The selected value is then passed to the single <code>lab1_seven_segment</code> decoder, whose output drives the segment lines. Assignment statements control which of the two display anodes are activated.</p>
+<div id="fig-schematic-dual" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/block_diagram_dual_segment.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Block Diagram for Dual 7 segement display
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="build-2-keypad-scanner-block-diagram" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="build-2-keypad-scanner-block-diagram"><span class="header-section-number">3.2</span> Build 2: Keypad Scanner Block Diagram</h2>
+<p>The second build uses the HSOSC to drive the parameterized scanning counter. The counter output is converted into the four keypad row signals using assignment statements. The keypad column inputs (LOW active) are inverted and connected to the LEDs (HIGH active) so that column activity can be observed during operation.</p>
+<div id="fig-schematic-dual" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/block diagram keypad.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Block Diagram for Keypad
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="build-1-seven-segment-display-schematics" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="build-1-seven-segment-display-schematics"><span class="header-section-number">3.3</span> Build 1: Seven-Segment Display Schematics</h2>
+<div id="fig-schematic-dual" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/schematic_dual_display.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-dual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Schematic for Dual 7 segement display
+</figcaption>
+</figure>
+</div>
+<p>The <a href="#fig-schematic-dual" class="quarto-xref">Figure&nbsp;8</a> schematic shows the FPGA connections to the two seven-segment displays and the associated current-limiting resistors. Component values, part numbers, FPGA pin numbers, and signal names are labeled according to the schematic requirements.</p>
+</section>
+<section id="build-2-keypad-scanner-display-schematics" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="build-2-keypad-scanner-display-schematics"><span class="header-section-number">3.4</span> Build 2: Keypad Scanner Display Schematics</h2>
+<div id="fig-schematic-keypad" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-keypad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/schematic_keypad.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-keypad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Schematic for Keypad with LED indicators
+</figcaption>
+</figure>
+</div>
+<p>The <a href="#fig-schematic-keypad" class="quarto-xref">Figure&nbsp;9</a> schematic shows the FPGA connections to the four keypad rows, four keypad columns, and LEDs. Series resistors were used where required to limit FPGA output current.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Results and Discussion</h1>
+<section id="build-1-seven-segment-display" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="build-1-seven-segment-display"><span class="header-section-number">4.1</span> Build 1: Seven-Segment Display</h2>
+<p>The seven-segment multiplexing design met the intended functional requirements. The <code>lab2_multiplexing_tb</code> testbench verified that the <code>digit select</code> signal correctly switches between the two displays, that the counter wraps around as expected, and that reset returns the multiplexing circuit to the correct initial state. The <code>lab2_top_tb</code> testbench further verified the complete top-level functionality, including the correct anode selection and seven-segment patterns for the hexadecimal values displayed on each digit. The testbench confirmed that the displayed values can be changed and that the circuit correctly responds to reset.</p>
+</section>
+<section id="testbench-simulation" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="testbench-simulation"><span class="header-section-number">4.2</span> Testbench Simulation</h2>
+<p>The multiplexing counter was parameterized with smaller values for simulation so that the display transitions could be observed without waiting for the full hardware counter period. The module-level testbench used a counter range of 0-7, with the display selection changing at a count of 4. The top-level testbench used the same reduced parameters while retaining the normal HSOSC clock source. The simulations demonstrated the expected alternating selection of the left and right displays and the corresponding segment patterns.</p>
+<p>The testbenches successfully verified the major functional behaviors of the seven-segment design, including multiplexing, counter wraparound, reset behavior, and hexadecimal display decoding. No functional issues were identified during simulation.</p>
+<div id="fig-multiplexing-tb" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-multiplexing-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/lab2_multiplexing_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-multiplexing-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Generated waveforms from the multiplexer test bench
+</figcaption>
+</figure>
+</div>
+<div id="fig-top-p1-tb" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-top-p1-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/lab2_JI_top_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-top-p1-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Generated waveforms from the top test bench
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="build-2-keypad-scanner" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="build-2-keypad-scanner"><span class="header-section-number">4.3</span> Build 2: Keypad Scanner</h2>
+<p>The keypad scanning design met the intended functional requirements. The <code>lab2_scanning_tb</code> testbench verified that the scanning circuit sequentially activates each row in the expected <code>1000</code>, <code>0100</code>, <code>0010</code>, and <code>0001</code> pattern. It also verified counter wraparound, reset behavior, and the enable input. When enable was deasserted, the active row remained unchanged, and scanning resumed correctly when enable was asserted again.</p>
+<p>The <code>lab2_top_tb</code> testbench verified the complete keypad interface, including the row scanning outputs and LED passthrough from the keypad columns. Multiple column input patterns were tested to confirm that the LED outputs were the inverse of the column inputs. The top-level reset behavior and complete four-row scanning sequence were also verified.</p>
+</section>
+<section id="testbench-simulation-1" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="testbench-simulation-1"><span class="header-section-number">4.4</span> Testbench Simulation</h2>
+<p>Both testbenches used reduced counter parameters to allow the scanning sequence to be observed quickly in QuestaSim. The scanning module testbench demonstrated all four row transitions, counter wraparound, enable behavior, and reset. The top-level testbench additionally verified the LED output for several column input combinations while the keypad scanning circuit was operating.</p>
+<p>The simulations demonstrated that the keypad scanning and LED passthrough logic operated as intended. All tested row transitions and output conditions produced the expected results, and no functional issue were identified during simulation.</p>
+<div id="fig-scanning-tb" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scanning-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/lab2_scanning_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scanning-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Generated waveforms from the scanning test bench
+</figcaption>
+</figure>
+</div>
+<div id="fig-top-p2-tb" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-top-p2-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/lab2_part2_top_tb.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-top-p2-tb-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Generated waveforms from the Keypad top level test bench
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<p>Two separate FPGA builds were successfully developed for Lab 2. The first build implemented a time-multiplexed two-digit seven-segment display using a single reused seven-segment decoder and a parameterized counter. The second build implemented a four-row keypad scanner using another parameterized counter, with the keypad column signals displayed on LEDs.</p>
+<p>Both designs reused the verified Lab 1 counter rather than implementing counters inline. Automatic QuestaSim testbenches were used to verify the required functionality, including multiplexing, keypad row transitions, reset, enable, wraparound, and LED driving.</p>
+<p>The designs met the Lab 2 requirements. There does seem to be a slight issue when multiple buttons are pushed in the same row and then a button is pushed in the row below it in the same column as one of them, that makes them all blink as if they were pushed down in both rows.</p>
+<p>I spent approximately 18 hours on this lab.</p>
+</section>
+<section id="ai-prototype-summary" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> AI Prototype Summary</h1>
+<details>
+<summary>
+<b>Click to expand to see the AI-generated code for the 2 Hz blink</b>
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode systemverilog code-with-copy"><code class="sourceCode systemverilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> time_mux_7seg (</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span>       clk,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span>       rst_n,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] in0,      <span class="co">// First 4-bit binary input</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] in1,      <span class="co">// Second 4-bit binary input</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] seg0,     <span class="co">// First 7-segment display output [g,f,e,d,c,b,a]</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] seg1      <span class="co">// Second 7-segment display output [g,f,e,d,c,b,a]</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span>       sel;</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] mux_in;</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] decoded_seg;</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Toggle select signal every clock cycle to alternate inputs</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_ff</span> @(<span class="kw">posedge</span> clk <span class="kw">or</span> <span class="kw">negedge</span> rst_n) <span class="kw">begin</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> (!rst_n)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>            sel &lt;= <span class="bn">1'b0</span>;</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">else</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            sel &lt;= ~sel;</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Input Multiplexer: selects between in0 and in1</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_comb</span> <span class="kw">begin</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        mux_in = sel ? in1 : in0;</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Shared 4-to-7 Common Anode Decoder (0 = Segment ON, 1 = Segment OFF)</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Bus mapping: {g, f, e, d, c, b, a}</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_comb</span> <span class="kw">begin</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">case</span> (mux_in)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h0</span>: decoded_seg = <span class="bn">7'b100_0000</span>;</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h1</span>: decoded_seg = <span class="bn">7'b111_1001</span>;</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h2</span>: decoded_seg = <span class="bn">7'b010_0100</span>;</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h3</span>: decoded_seg = <span class="bn">7'b011_0000</span>;</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h4</span>: decoded_seg = <span class="bn">7'b001_1001</span>;</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h5</span>: decoded_seg = <span class="bn">7'b001_0010</span>;</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h6</span>: decoded_seg = <span class="bn">7'b000_0010</span>;</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h7</span>: decoded_seg = <span class="bn">7'b111_1000</span>;</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h8</span>: decoded_seg = <span class="bn">7'b000_0000</span>;</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'h9</span>: decoded_seg = <span class="bn">7'b001_0000</span>;</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hA</span>: decoded_seg = <span class="bn">7'b000_1000</span>;</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hB</span>: decoded_seg = <span class="bn">7'b000_0011</span>;</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hC</span>: decoded_seg = <span class="bn">7'b100_0110</span>;</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hD</span>: decoded_seg = <span class="bn">7'b010_0001</span>;</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hE</span>: decoded_seg = <span class="bn">7'b000_0110</span>;</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'hF</span>: decoded_seg = <span class="bn">7'b000_1110</span>;</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            <span class="kw">default</span>: decoded_seg = <span class="bn">7'b111_1111</span>; <span class="co">// All OFF</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="kw">endcase</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Output Demultiplexer / Registers: latches decoded value to corresponding output bus</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_ff</span> @(<span class="kw">posedge</span> clk <span class="kw">or</span> <span class="kw">negedge</span> rst_n) <span class="kw">begin</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> (!rst_n) <span class="kw">begin</span></span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>            seg0 &lt;= <span class="bn">7'b111_1111</span>;</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>            seg1 &lt;= <span class="bn">7'b111_1111</span>;</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>            <span class="kw">if</span> (sel == <span class="bn">1'b0</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>                seg0 &lt;= decoded_seg;</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>            <span class="kw">else</span></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>                seg1 &lt;= decoded_seg;</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The result after putting in my code and prompting it with the second question</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode systemverilog code-with-copy"><code class="sourceCode systemverilog"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> dual_seg_time_mux (</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span>       reset,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] hex_left,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] hex_right,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] seg_left,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] seg_right</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> int_osc;</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> digit_select;</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>] selected_hex;</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">6</span>:<span class="dv">0</span>] decoded_seg;</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Internal high-speed oscillator instance</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    HSOSC #(</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        .CLKHF_DIV(<span class="bn">2'b00</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    ) hf_osc (</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        .CLKHFPU(<span class="bn">1'b1</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>        .CLKHFEN(<span class="bn">1'b1</span>),</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        .CLKHF(int_osc)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Multiplexing counter controller[cite: 2]</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    lab2_multiplexing mux_ctrl (</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>        .clk(int_osc),</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>        .reset(reset),</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        .digit_select(digit_select)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Input MUX: alternates between hex_left and hex_right[cite: 1]</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> selected_hex = digit_select ? hex_right : hex_left;</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Single common-anode seven-segment decoder instance[cite: 1, 3]</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    lab1_seven_segment decoder (</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>        .<span class="kw">s</span>(selected_hex),</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>        .seg(decoded_seg)</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Demultiplexer registers: latches decoded value to corresponding 7-bit output bus</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_ff</span> @(<span class="kw">posedge</span> int_osc) <span class="kw">begin</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> (~reset) <span class="kw">begin</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>            seg_left  &lt;= <span class="bn">7'b111_1111</span>; <span class="co">// Active-low off state[cite: 3]</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>            seg_right &lt;= <span class="bn">7'b111_1111</span>; <span class="co">// Active-low off state[cite: 3]</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span> <span class="kw">else</span> <span class="kw">if</span> (digit_select) <span class="kw">begin</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>            seg_right &lt;= decoded_seg;</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>            seg_left  &lt;= decoded_seg;</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<p>For this prototype, I used an LLM to generate SystemVerilog for a time-multiplexed two-digit seven-segment display. I first gave the LLM the prompt without any additional context. The resulting code was functional in concept, but it implemented the seven-segment decoder and multiplexing logic entirely within a single module. I think that the general idea to solve the problem was essentially the same. The only thing was it wasn’t created in a modular way, which would prevent the use of these modules in future applications, which is a limitation. However, I think it worked basically identical to my implementation. It did, however, make it so that the output would toggle between each anode every clock cycle, which would be way too quick and cause bleeding.</p>
+<p>I then repeated the experiment using my Lab 1 files as context. The difference was significant because the LLM was able to use the existing <code>lab1_seven_segment</code> decoder, <code>lab2_multiplexing</code> module, and <code>HSOSC</code> oscillator rather than recreating these components. The generated code created these existing modules and connected them together using an input multiplexer. This made the second design more consistent with the structure of my Lab 2 project and reduced the amount of new logic that needed to be written.</p>
+<p>The context-aware response was more useful because it reused my existing modules and oscillator, while the context-free response created its own clock and decoder logic. However, the context-aware response still added unnecessary sequential registers (don’t need a right and left seg, just need a seg as the multiplexer takes care of which one to choose), so reviewing and modifying the generated code would still need to be done. This showed me that providing context improves LLM-generated Verilog, but the code still needs to be checked for correctness and efficiency.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
