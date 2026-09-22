@@ -74,7 +74,7 @@ $$
 N_{half} = \frac{N_{mux}}{2}
 = \frac{48{,}000~\text{cycles}}{2}
 = 24{,}000~\text{cycles}.
-$$
+$$ {#eq-tclk}
 
 Thus, each display has a $50\%$ duty cycle and is refreshed at $1~\text{kHz}$. Which should be 
 faster than the human eye can see and still have enough time for the physical system to change 
@@ -101,7 +101,7 @@ The base current was calculated from the voltage across the base-emitter junctio
 $$
 I_B =
 \frac{V_{CC}-V_{OL(max)}-V_{BE(sat)}}{R_B}=\frac{3.3V-0.4V-0.75V}{2.15 mA}=1k\Omega
-$$
+$$ {#eq-rpnp}
 
 where $V_{CC}=3.3~\text{V}$, $R_B=1~\text{k}\Omega$, $V_{OL(max)}=0.4V$, and $V_{BE(sat)}=0.75V$ was taken from the GPIO datasheet 
 @fig-GPIO-datasheet and transistor datasheet @fig-pnp-transistor-graph The calculated base respectively. The FPGA's $V_{OL,\max}$ 
@@ -124,7 +124,7 @@ $$
 R_{LED} =
 \frac{V_{CC}-V_{CE(sat)}-V_F}{I_C}.
 =\frac {3.3V-0.1V-1.8V}{14 mA}=100 \Omega
-$$
+$$ {#eq-rled}
 
 The LED forward voltage, $V_F$, was obtained from the seven-segment display datasheet using the forward-current versus forward-voltage 
 characteristic graph seen in @fig-led-datasheet at approximately $14~\text{mA}$. Using the resulting forward voltage and the target 
@@ -215,7 +215,7 @@ The maximum collector current is limited by the $10~\text{k}\Omega$ column pull-
 $$
 I_C=\frac{V_{CC}-V_{CE(sat)}}{10~\text{k}\Omega}
 \approx 0.32~\text{mA}.
-$$
+$$ {#eq-rnpn}
 
 Where $V_{CC}=3.3 V$,$V_{CE(sat)}=0.1 V$ as seen in. The transistor was checked for saturation
 using a conservative forced current gain of 10:
