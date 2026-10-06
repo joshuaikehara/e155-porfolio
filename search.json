@@ -1,5 +1,89 @@
 [
   {
+    "objectID": "labs/lab5/lab5.html",
+    "href": "labs/lab5/lab5.html",
+    "title": "Lab 5: Interrupts",
+    "section": "",
+    "text": "In this lab, an interupt-driven quadrature encoder system was implented on the STM32L432KC to measure the direction and rotational speed of a DC motor. The encoder has two output channels, A and B, which produce phase-shifted square waves as the motor rotates. Both rising and falling edges of both channels are detected using external interrupts, providing 4x quadrature decoding and a resolution of 480 counts per motor revolutions assuming we are using a 600 RPM motor.\nThe system records encoder transitions and records the movement and the timestamp using the interrupt and preforms velocity calculations in the main loop. A free running TIM2 counter provides micro-seconod resolution time stamps for the encoder edges. The main loop periodically obtains an atomic snapshot of the encoder count and the time stamp of the most recent edge, then calculate the motor velocity in milli-revolutions per second and displays the results through the Segger debug terminal."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#interrupt-configuration",
+    "href": "labs/lab5/lab5.html#interrupt-configuration",
+    "title": "Lab 5: Interrupts",
+    "section": "3.1 Interrupt configuration",
+    "text": "3.1 Interrupt configuration\nThe encoder pins are configured as digital inputs. SYSCFG is used to connect the GPIO pins to their corresponding EXTI lines. Both rising and falling edges are enabled with RTSR1 and FTSR1 for each EXTI line. This provides four encoder transitions for every encoder pulse. Using both edges of both channels provides the highest possible quadrature resolution. The two EXTI interupt sources are enabled in the NVIC. The more computationally expensive velocity calculations aren’t preformed in the interrupt handelers and they only update the state, position count, invalid transition count, and timestamp."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#quadrature-decoding",
+    "href": "labs/lab5/lab5.html#quadrature-decoding",
+    "title": "Lab 5: Interrupts",
+    "section": "3.2 Quadrature Decoding",
+    "text": "3.2 Quadrature Decoding\nThe currend encoder state is represented by two bits:\n\\[\n\\text{state}={A,B}\n\\]\nThe previous and current states are used as a four-bit table index:\n\\[\n\\text{index}=(\\text{previous state}\\ll2)+\\text{current state}\n\\]\nthe program uses the following\n\n3.2.1 Quadrature State Sequence\nFor the direction corresponding to a positive encoder count, the valid quadrature sequence is:\n\\[\n00 \\rightarrow 10 \\rightarrow 11 \\rightarrow 01 \\rightarrow 00\n\\]\nEach transition produces a count of \\(+1\\):\n\n\n\nTransition\nTable Index\nStep\n\n\n\n\n00 → 10\n2\n+1\n\n\n10 → 11\n11\n+1\n\n\n11 → 01\n13\n+1\n\n\n01 → 00\n4\n+1\n\n\n\nFor the opposite direction, the sequence is:\n\\[\n00 \\rightarrow 01 \\rightarrow 11 \\rightarrow 10 \\rightarrow 00\n\\]\nEach transition produces a count of \\(-1\\):\n\n\n\nTransition\nTable Index\nStep\n\n\n\n\n00 → 01\n1\n-1\n\n\n01 → 11\n7\n-1\n\n\n11 → 10\n14\n-1\n\n\n10 → 00\n8\n-1\n\n\n\nthe remaining states are either no change or invalid change to get the full truth table of ### Quadrature Decoder State Table\nThe encoder has two channels, A and B, which together form a two-bit state. Each encoder edge causes a transition from one state to another. The previous and new states are combined to form a 4-bit index into the quadrature step table.\n\n\n\n\n\n\n\n\n\n\nPrevious State\nNew State\nIndex\nQUADRATURE_STEP_TABLE value\nMeaning\n\n\n\n\n00\n00\n0\n0\nNo change\n\n\n00\n01\n1\n-1\nReverse direction\n\n\n00\n10\n2\n+1\nForward direction\n\n\n00\n11\n3\n0\nInvalid transition\n\n\n01\n00\n4\n+1\nForward direction\n\n\n01\n01\n5\n0\nNo change\n\n\n01\n10\n6\n0\nInvalid transition\n\n\n01\n11\n7\n-1\nReverse direction\n\n\n10\n00\n8\n-1\nReverse direction\n\n\n10\n01\n9\n0\nInvalid transition\n\n\n10\n10\n10\n0\nNo change\n\n\n10\n11\n11\n+1\nForward direction\n\n\n11\n00\n12\n0\nInvalid transition\n\n\n11\n01\n13\n+1\nForward direction\n\n\n11\n10\n14\n-1\nReverse direction\n\n\n11\n11\n15\n0\nNo change\n\n\n\nA valid clockwise or counterclockwise transition changes the encoder count by either +1 or -1 A transition in which both encoder channels appear to change simultaneously is treated as an invalid transition. The encoder position is therefore accumulated using\ng_count += step\nThe change in count determines direction : positive velocity \\(\\rightarrow\\) CW negative velocity \\(\\rightarrow\\) CCW *zero velocity \\(\\rightarrow\\) —\nA positive encoder step produces positive velocity and corresponds to CW rotation in this implementation, while a negative step produces negative velocity and corresponds to CCW rotation."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#timestamp-measurement",
+    "href": "labs/lab5/lab5.html#timestamp-measurement",
+    "title": "Lab 5: Interrupts",
+    "section": "3.3 Timestamp Measurement",
+    "text": "3.3 Timestamp Measurement"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#velocity-calculation",
+    "href": "labs/lab5/lab5.html#velocity-calculation",
+    "title": "Lab 5: Interrupts",
+    "section": "3.4 Velocity Calculation",
+    "text": "3.4 Velocity Calculation\nThe velocity calculation uses the change in encoder counter and the teim between encoder edges. The fundamental relationship is\n\\[\n\\text{rev/s}=\\frac{\\Delta\\text{counts}}\n{\\text{counts/rev}\\times\\Delta t}\n\\]\nwhere \\(\\Delta t\\) is measured in seconds.\nSince the program stores velocity in milli-revolutions per second, the implementation uses: \\[\n\\frac{\n\\Delta C\\times10^6\\times10^3\n}{\n\\Delta t_{\\mu s}\\times\\text{pulses per revolution}\\times 4\n}\n\\]\nTherefore:\n\\[\n\\frac{\\Delta C\\times10^9}\n{\\Delta t_{\\mu s}\\times\\text{pulses per revolution}\\times 4}\n\\]\nThe resulting value is converted back to milli-revolutions per second.\nFor example, for the 600 RPM motor that has 120 pulses per revolution with 4 different edges which makes it 480 counts per revolution. if that has 960 counts in 1 second:\n\\[\nv=\n\\frac{960}{480(1)}\n=2\\text{ rev/s}\n\\]\nTherefore the program reports:\nSpeed: 2.000 rev/s\nA negative count change produces a negative velocity and therefore indicates the opposite direction."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#main-loop-and-update-rather",
+    "href": "labs/lab5/lab5.html#main-loop-and-update-rather",
+    "title": "Lab 5: Interrupts",
+    "section": "3.5 Main Loop and Update rather",
+    "text": "3.5 Main Loop and Update rather\nThe main loop does not poll the encoder pins. Instead, the encoder is detected exclusively though EXTI interrupts. The main loop waits 250 ms between reports therefore, the reporting frequency is\n\\[\nf_{\\mathrm{report}}=\n\\frac{1}{0.250}\n=4\\text{ Hz}\n\\]\nThus, since 4 Hz exceeds the minimum update rate of 1 Hz.\nthe interrupts are disabled while the shared values are copied to prevent them from changing while it’s being taken and velocity calculations are preformed outside of the interrupt handelers in the main program."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#resolution-of-measurement-achieved",
+    "href": "labs/lab5/lab5.html#resolution-of-measurement-achieved",
+    "title": "Lab 5: Interrupts",
+    "section": "3.6 Resolution of measurement achieved",
+    "text": "3.6 Resolution of measurement achieved\nTwo different types of resolution are important to the velocity measurement system encoder resolution and time resolution. The encoder resolution determines how much rotational motion is represented by each detected encoder transition, while the time resolution determines how precisely the time between transitions can be measured.\nThe motor encoder produces 120 pulses per revolution. Because the system uses 4x quadrature decoding, both the rising and falling edges of both encoder channels are detected. Therefore, each encoder pulse produces four countable transitions:\n\\[\nN_{\\mathrm{counts/rev}} = 120\\ \\frac{\\mathrm{pulses}}{\\mathrm{rev}}\n\\times 4\\ \\frac{\\mathrm{counts}}{\\mathrm{pulse}}\n= 480\\ \\frac{\\mathrm{counts}}{\\mathrm{rev}}\n\\]\nThus, the encoder resolution is:\n\\[\n\\boxed{480\\ \\mathrm{counts/rev}}\n\\]\nor, equivalently, each encoder count represents:\n\\[\n\\frac{1}{480}\\ \\mathrm{rev/count}\n\\approx 0.002083\\ \\mathrm{rev/count}\n\\]\nThe time resolution is determined separately by TIM2. The timer is configured to run at 1 MHz, giving one timer tick every 1 \\(\\mu\\)s:\n\\[\nT_{\\mathrm{tick}} = \\frac{1}{1,\\mathrm{MHz}}\n= 1\\ \\mu\\mathrm{s}\n\\]\nTherefore, the system can measure the time between encoder transitions with a resolution of approximately 1 \\(\\mu\\)s. The timer resolution does not determine the encoder’s rotational resolution. Instead, the two resolutions work together when calculating velocity. The encoder count determines the amount of rotation, while the timestamp difference determines how long that rotation took.\nThe velocity is calculated from the change in encoder count and the elapsed time between encoder transitions:\n\\[\nv =\n\\frac{\\Delta C}{480}\n\\frac{1}{\\Delta t}\n\\]\nwhere \\(\\Delta C\\) is the change in encoder count and \\(\\Delta t\\) is the elapsed time in seconds. In the implementation, \\(\\Delta t\\) is measured in microseconds and the result is scaled to milli-revolutions per second. This allows the system to use the encoder’s 480 counts/revolution resolution together with TIM2’s 1 \\(\\mu\\)s time resolution to determine the motor’s rotational speed. The effective velocity resolution depends on the measurement interval, since one encoder count represents (1/480) revolution and the elapsed time determines the corresponding rotational speed."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#low-speed-operation",
+    "href": "labs/lab5/lab5.html#low-speed-operation",
+    "title": "Lab 5: Interrupts",
+    "section": "3.7 Low Speed Operation",
+    "text": "3.7 Low Speed Operation\nthe velocity algorithm is designed to continue to produce a nonzero velocity when the motor is moving slowly. The program doesn’t require an encoder edge during every 250 ms reporting interval. Instead, it remembers the timestamp of the most recent encoder edge. When another edge occurs, the velocity is calcualted using the time between the two measured edges. This is particularly useful at low speeds becasue a fixed window measurement could easily observe zero counts during a short measurement interval eventhough the motor is still moving. The resolution comes from the fact that there are 120 pulses/ revolution and since we have One quadrature cycle:\nA rising A falling B rising B falling\nThis means that there are 4 detectable transitions so the 120 pulses per revolutiono turns into\n$$ 120 = 480\n$$\nThus, for the smallest amount of\nFor example, at 1 count per second: \\[\nv=\n\\frac{1}{480}\n\\approx0.00208\\text{ rev/s}\n\\]\nTherefore, the encoder resolution allows very small rotational speeds to be detected.\nThe software also includes a one-second zero-speed timeout. If no encoder edge has occurred for more than one second, the reported velocity is set to zero. This allows the system to distinguish a stopped motor from a motor whose previous velocity measurement should simply be retained."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#software",
+    "href": "labs/lab5/lab5.html#software",
+    "title": "Lab 5: Interrupts",
+    "section": "4.1 Software",
+    "text": "4.1 Software\nThe source code for the project can be found in the associated Github repository.\nThe encoder module is responsible for GPIO, EXTI, NVIC, quadrature decoding, encoder position, and edge timestamps.\nThe timestamp module configures TIM2 as a 1 MHz free-running timer.\nThe velocity module converts encoder count and timing information into signed velocity.\nThe main module initializes the system, periodically obtains encoder snapshots, calculates velocity, and prints the results."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#flow-chart",
+    "href": "labs/lab5/lab5.html#flow-chart",
+    "title": "Lab 5: Interrupts",
+    "section": "4.2 Flow Chart",
+    "text": "4.2 Flow Chart\nThe system operates primarily through interrupt handlers that detect changes in the encoder inputs. When an edge occurs, the handler reads the current states of both encoder channels and uses the state transition to determine the direction and step. It also records the timestamp of the edge. This count and timing data is then used by the velocity calculation, while the main loop periodically processes and reports the results every 250 ms. The overall architecture can be represented as follows\n\n\n\n\n\n\nFigure 1: Main flow chart of the interrupt-driven encoder system.\n\n\n\nThe interrupt and main-loop communication can be represented by the following flow:\n\n\n\n\n\n\nFigure 2: Encoder ISR Flow chart\n\n\n\nThe last chart is the decision logic inside velocityUpdate(), which main calls on each report.\n\n\n\n\n\n\nFigure 3: velocity update flow chart"
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#schematic",
+    "href": "labs/lab5/lab5.html#schematic",
+    "title": "Lab 5: Interrupts",
+    "section": "4.3 Schematic",
+    "text": "4.3 Schematic\n\n\n\n\n\n\nFigure 4: Eletrical Schematic of the Lab5 Interrupts\n\n\n\nThe schematic shows the DC gear motor and its integrated quadrature encoder. The motor is powered separately from the microcontroller, while the encoder provides the feedback signals used for speed and direction measurement. Encoder channels A and B are connected to PA9 and PA10 on the STM32L432KC, respectively. The encoder is also connected to its required power and ground connections. The schematic separates the motor power connections from the encoder signal connections to clearly show that the microcontroller monitors the encoder outputs rather than directly driving the motor."
+  },
+  {
+    "objectID": "labs/lab5/lab5.html#interrupt-based-code-vs-manual-polling-at-high-speeds",
+    "href": "labs/lab5/lab5.html#interrupt-based-code-vs-manual-polling-at-high-speeds",
+    "title": "Lab 5: Interrupts",
+    "section": "5.1 interrupt-based code vs manual polling at high speeds",
+    "text": "5.1 interrupt-based code vs manual polling at high speeds\n\n\n\n\n\n\nFigure 17: 12V input high rotation rate Oscope freqeuncy measurement\n\n\n\nAt 12 V, the oscilloscope measured an encoder frequency of 1.19 kHz on one channel, corresponding to \\(1190/120 = 9.92 \\text{rev/s}\\). With 4x quadrature decoding, this produces \\(1190(4) = 4760 \\text{transitions/s}\\), or approximately one transition every \\(210.1\\ \\mu\\mathrm{s}\\). An interrupt-based implementation can respond to each transition using the EXTI hardware, whereas a polling implementation must repeatedly check the encoder inputs faster than the \\(210.1\\ \\mu\\mathrm{s}\\) transition period to avoid missing transitions. Missing transitions would cause the measured encoder count to be lower than the true count, resulting in an underestimated motor speed and potentially incorrect direction information if transitions are missed inconsistently. Therefore, interrupt-based detection provides more reliable pulse detection at high speeds, while polling requires continuous CPU activity and becomes more susceptible to missed transitions as the motor speed increases. The tradeoff is that each interrupt requires some processing time, so the interrupt handler must remain short enough to keep up with the encoder transitions. The interrupt-based approach avoids relying on a fixed polling rate because the EXTI hardware detects each configured edge and calls the interrupt handler. This provides a more reliable method for capturing encoder transitions at high speed, while polling has the advantage of simpler continuous sampling but requires the processor to repeatedly check the inputs."
+  },
+  {
     "objectID": "labs/lab3/lab3.html",
     "href": "labs/lab3/lab3.html",
     "title": "Lab 3: Keypad Scanner",
