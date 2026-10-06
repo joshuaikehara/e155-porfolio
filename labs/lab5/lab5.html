@@ -233,11 +233,10 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#quadrature-state-sequence" id="toc-quadrature-state-sequence" class="nav-link" data-scroll-target="#quadrature-state-sequence"><span class="header-section-number">3.2.1</span> Quadrature State Sequence</a></li>
   </ul></li>
-  <li><a href="#timestamp-measurement" id="toc-timestamp-measurement" class="nav-link" data-scroll-target="#timestamp-measurement"><span class="header-section-number">3.3</span> Timestamp Measurement</a></li>
-  <li><a href="#velocity-calculation" id="toc-velocity-calculation" class="nav-link" data-scroll-target="#velocity-calculation"><span class="header-section-number">3.4</span> Velocity Calculation</a></li>
-  <li><a href="#main-loop-and-update-rather" id="toc-main-loop-and-update-rather" class="nav-link" data-scroll-target="#main-loop-and-update-rather"><span class="header-section-number">3.5</span> Main Loop and Update rather</a></li>
-  <li><a href="#resolution-of-measurement-achieved" id="toc-resolution-of-measurement-achieved" class="nav-link" data-scroll-target="#resolution-of-measurement-achieved"><span class="header-section-number">3.6</span> Resolution of measurement achieved</a></li>
-  <li><a href="#low-speed-operation" id="toc-low-speed-operation" class="nav-link" data-scroll-target="#low-speed-operation"><span class="header-section-number">3.7</span> Low Speed Operation</a></li>
+  <li><a href="#velocity-calculation" id="toc-velocity-calculation" class="nav-link" data-scroll-target="#velocity-calculation"><span class="header-section-number">3.3</span> Velocity Calculation</a></li>
+  <li><a href="#main-loop-and-update-rather" id="toc-main-loop-and-update-rather" class="nav-link" data-scroll-target="#main-loop-and-update-rather"><span class="header-section-number">3.4</span> Main Loop and Update rather</a></li>
+  <li><a href="#resolution-of-measurement-achieved" id="toc-resolution-of-measurement-achieved" class="nav-link" data-scroll-target="#resolution-of-measurement-achieved"><span class="header-section-number">3.5</span> Resolution of measurement achieved</a></li>
+  <li><a href="#low-speed-operation" id="toc-low-speed-operation" class="nav-link" data-scroll-target="#low-speed-operation"><span class="header-section-number">3.6</span> Low Speed Operation</a></li>
   </ul></li>
   <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation"><span class="header-section-number">4</span> Technical Documentation</a>
   <ul class="collapse">
@@ -541,11 +540,8 @@ window.Quarto = {
 <p>A positive encoder step produces positive velocity and corresponds to CW rotation in this implementation, while a negative step produces negative velocity and corresponds to CCW rotation.</p>
 </section>
 </section>
-<section id="timestamp-measurement" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="timestamp-measurement"><span class="header-section-number">3.3</span> Timestamp Measurement</h2>
-</section>
-<section id="velocity-calculation" class="level2" data-number="3.4">
-<h2 data-number="3.4" class="anchored" data-anchor-id="velocity-calculation"><span class="header-section-number">3.4</span> Velocity Calculation</h2>
+<section id="velocity-calculation" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="velocity-calculation"><span class="header-section-number">3.3</span> Velocity Calculation</h2>
 <p>The velocity calculation uses the change in encoder counter and the teim between encoder edges. The fundamental relationship is</p>
 <p><span class="math display">\[
 \text{rev/s}=\frac{\Delta\text{counts}}
@@ -575,8 +571,8 @@ v=
 <p>Speed: 2.000 rev/s</p>
 <p>A negative count change produces a negative velocity and therefore indicates the opposite direction.</p>
 </section>
-<section id="main-loop-and-update-rather" class="level2" data-number="3.5">
-<h2 data-number="3.5" class="anchored" data-anchor-id="main-loop-and-update-rather"><span class="header-section-number">3.5</span> Main Loop and Update rather</h2>
+<section id="main-loop-and-update-rather" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="main-loop-and-update-rather"><span class="header-section-number">3.4</span> Main Loop and Update rather</h2>
 <p>The main loop does not poll the encoder pins. Instead, the encoder is detected exclusively though EXTI interrupts. The main loop waits 250 ms between reports therefore, the reporting frequency is</p>
 <p><span class="math display">\[
 f_{\mathrm{report}}=
@@ -586,8 +582,8 @@ f_{\mathrm{report}}=
 <p>Thus, since 4 Hz exceeds the minimum update rate of 1 Hz.</p>
 <p>the interrupts are disabled while the shared values are copied to prevent them from changing while it’s being taken and velocity calculations are preformed outside of the interrupt handelers in the main program.</p>
 </section>
-<section id="resolution-of-measurement-achieved" class="level2" data-number="3.6">
-<h2 data-number="3.6" class="anchored" data-anchor-id="resolution-of-measurement-achieved"><span class="header-section-number">3.6</span> Resolution of measurement achieved</h2>
+<section id="resolution-of-measurement-achieved" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="resolution-of-measurement-achieved"><span class="header-section-number">3.5</span> Resolution of measurement achieved</h2>
 <p>Two different types of resolution are important to the velocity measurement system encoder resolution and time resolution. The encoder resolution determines how much rotational motion is represented by each detected encoder transition, while the time resolution determines how precisely the time between transitions can be measured.</p>
 <p>The motor encoder produces 120 pulses per revolution. Because the system uses 4x quadrature decoding, both the rising and falling edges of both encoder channels are detected. Therefore, each encoder pulse produces four countable transitions:</p>
 <p><span class="math display">\[
@@ -618,8 +614,8 @@ v =
 \]</span></p>
 <p>where <span class="math inline">\(\Delta C\)</span> is the change in encoder count and <span class="math inline">\(\Delta t\)</span> is the elapsed time in seconds. In the implementation, <span class="math inline">\(\Delta t\)</span> is measured in microseconds and the result is scaled to milli-revolutions per second. This allows the system to use the encoder’s 480 counts/revolution resolution together with TIM2’s 1 <span class="math inline">\(\mu\)</span>s time resolution to determine the motor’s rotational speed. The effective velocity resolution depends on the measurement interval, since one encoder count represents (1/480) revolution and the elapsed time determines the corresponding rotational speed.</p>
 </section>
-<section id="low-speed-operation" class="level2" data-number="3.7">
-<h2 data-number="3.7" class="anchored" data-anchor-id="low-speed-operation"><span class="header-section-number">3.7</span> Low Speed Operation</h2>
+<section id="low-speed-operation" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="low-speed-operation"><span class="header-section-number">3.6</span> Low Speed Operation</h2>
 <p>the velocity algorithm is designed to continue to produce a nonzero velocity when the motor is moving slowly. The program doesn’t require an encoder edge during every 250 ms reporting interval. Instead, it remembers the timestamp of the most recent encoder edge. When another edge occurs, the velocity is calcualted using the time between the two measured edges. This is particularly useful at low speeds becasue a fixed window measurement could easily observe zero counts during a short measurement interval eventhough the motor is still moving. The resolution comes from the fact that there are 120 pulses/ revolution and since we have One quadrature cycle:</p>
 <p>A rising A falling B rising B falling</p>
 <p>This means that there are 4 detectable transitions so the 120 pulses per revolutiono turns into</p>
