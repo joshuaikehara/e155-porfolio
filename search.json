@@ -236,5 +236,54 @@
     "title": "Lab 2: Multiplexed 7-Segment Display",
     "section": "4.4 Testbench Simulation",
     "text": "4.4 Testbench Simulation\nBoth testbenches used reduced counter parameters to allow the scanning sequence to be observed quickly in QuestaSim. The scanning module testbench demonstrated all four row transitions, counter wraparound, enable behavior, and reset. The top-level testbench additionally verified the LED output for several column input combinations while the keypad scanning circuit was operating.\nThe simulations demonstrated that the keypad scanning and LED passthrough logic operated as intended. All tested row transitions and output conditions produced the expected results, and no functional issue were identified during simulation.\n\n\n\n\n\n\nFigure 12: Generated waveforms from the scanning test bench\n\n\n\n\n\n\n\n\n\nFigure 13: Generated waveforms from the Keypad top level test bench"
+  },
+  {
+    "objectID": "labs/lab4/lab4.html",
+    "href": "labs/lab4/lab4.html",
+    "title": "Lab 4: Digital Audio",
+    "section": "",
+    "text": "In this lab, a digital audio system was implementated using the STM32L432KC microcontroller, an LM386 audio amplifier, and an 8-ohm speaker. The MCU generate square-wave audio signals using the TIM2 timer and outputs them through PA0. A second timer, TIM6, is used to control the duration of each note in milliseconds. The system reads an array containing the pitch and duration of each note and sequentially plays Fur Elise. Rests are represented by a frequency of zero and produce silence for the specified duration.\nThe system uses the MCU’s internal 16MHz HSI oscillator as the timer clock. TIM2 generates the desired pitch by changing its auto reload register based on the requested frequency, while TIM6 provides a 1kHz timing reference for note durations. An LM386 amplifier is used to increase the signal level sufficiently to drive the 8-ohm speaker."
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#schematic",
+    "href": "labs/lab4/lab4.html#schematic",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.1 Schematic",
+    "text": "3.1 Schematic\nThe schematic represents the external components used in the circuit including the MCU output, LM386 amplifier, potentometer, and 8-ohm speaker. components and connections internal to the MCU are not shown in the schematic. the appropriate power and ground connections are shown, and all external component values and part numbers are labeled.\n\n\n\n\n\n\nFigure 1: Eletrical Schematic of the Lab4 Digital Audio"
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#frequency-calculations",
+    "href": "labs/lab4/lab4.html#frequency-calculations",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.2 frequency calculations",
+    "text": "3.2 frequency calculations\nTIM2 uses the 16 MHz HSI clock with a prescaler of zero. The output frequency is therefore:\n\\[\nf_{out}=\\frac{16,000,000}{ARR+1}.\n\\]\nThe program calculates a rounded divider according to\n\\[\ndiv=\\operatorname{round}\\left(\\frac{16,000,000}{f_{target}}\\right)\n\\]\nand sets\n\\[\nARR=div-1.\n\\]\nSo, for a 440 Hz note,\n\\[\ndiv=\\operatorname{round}\\left(\\frac{16,000,000}{440}\\right)=36,364.\n\\]\nThus,\n\\[\nARR=36,364-1=36,363\n\\]\nand the resulting frequency is\n\\[\nf_{actual}=\\frac{16,000,000}{36,364}\\approx439.996\\text{ Hz}.\n\\]\nThe frequency error is\n\\[\n\\frac{|439.996-440|}{440}\\times100\n\\approx0.001\\%.\n\\]\nThis demonstrates how the desired pitch is converted into a timer configuration.\nFor the required 220 Hz test:\n\\[\ndiv=\\operatorname{round}\\left(\\frac{16,000,000}{220}\\right)\n=72,727\n\\]\ngiving\n\\[\nf_{actual}=\\frac{16,000,000}{72,727}=\\approx220.000825\\text{ Hz}.\n\\]\nthe resulting error is approximately\n\\[\n\\frac{|219.999-220|}{440}\\times100\n\\approx0.000375\\%\n\\]\nFor the required 1000 Hz test:\n\\[\ndiv=\\operatorname{round}\\left(\\frac{16,000,000}{1000}\\right)\n=16,000\n\\]\nand therefore,\n\\[\nf_{actual}=\\frac{16,000,000}{16,000}\n=1000\\text{ Hz}.\n\\]\nThe error is 0%.\nBoth required test frequencies are therefore within the specified 1% accuracy."
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#fur-elise-frequency-accuracy",
+    "href": "labs/lab4/lab4.html#fur-elise-frequency-accuracy",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.3 Fur Elise Frequency accuracy",
+    "text": "3.3 Fur Elise Frequency accuracy\nDuration Calculation Spreadsheet\nTo verify the accuracy of all notes in Fur Elise, the entire score and note durations were evaluated using the same calculations implemented in the C code and shown above. For each target frequency, the rounded divider, resulting ARR value, actual frequency, and percentage error were calculated."
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#checking-only-220-hz-and-1000-hz-is-not-sufficient",
+    "href": "labs/lab4/lab4.html#checking-only-220-hz-and-1000-hz-is-not-sufficient",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.4 Checking only 220 Hz and 1000 Hz is not sufficient",
+    "text": "3.4 Checking only 220 Hz and 1000 Hz is not sufficient\nIt’s not sufficent because it does not guarantee that every note is within 1% accuracy. The timer is driven by a 16 MHz clock and can only use integer divider values, so each desired frequency must be approximated by the closest frequency that the timer can generate. Because the timer period can only change in increments of one clock cycle, the available frequency resolution depends on the desired frequency. This produces a different rounding error for each note, meaning that accuracy at two points in the operating range does not guarantee accuracy for all other notes. Therefore, every unique pitch used in Für Elise was checked individually to verify that its generated frequency is within 1% of the desired frequency."
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#frequency-range",
+    "href": "labs/lab4/lab4.html#frequency-range",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.5 Frequency Range",
+    "text": "3.5 Frequency Range\nFor the theoretical maximum frequency, the smallest usable divider is 2 because thats the smallest number of counter ticks to see a complete period of timer counts.\n\\[\ndiv_{min}=2\n\\]\nTherefore, without changing the clock set ups and keeping the existing code, the max frequency that it supports is\n\\[\nf_{max}=\\frac{16,000,000}{2}\n=8,000,000\\text{ Hz}.\n\\]\nThe theoretical minimum frequency is obtained from the largest possible 32-bit timer divider:\n\\[\ndiv_{max}=2^{32}\n\\]\ngiving\n\\[\nf_{min}=\n\\frac{16,000,000}{2^{32}}\n\\approx0.00373\\text{ Hz}.\n\\]\nThese values represent the theoretical frequency limits of the timer configuration rather than the range of frequencies required for musical playback."
+  },
+  {
+    "objectID": "labs/lab4/lab4.html#duration-calculations",
+    "href": "labs/lab4/lab4.html#duration-calculations",
+    "title": "Lab 4: Digital Audio",
+    "section": "3.6 Duration calculations",
+    "text": "3.6 Duration calculations\nTIM6 is configured to generate a 1 kHz timing reference. Its prescaler is calculated as\n\\[\nPSC=\\frac{16,000,000}{1000}-1\n=15,999.\n\\]\nTherefore, each timer count represents approximately\n\\[\n\\frac{1}{1000}\\text{ s}=1\\text{ ms}.\n\\]\nSince TIM6 is a 16-bit timer, the largest value that can be stored in its auto-reload register is 65,535. Because the timer counts from 0 through the value in ARR, the maximum duration of a single TIM6 interval is\n\\[\nt_{\\max,\\text{single}}\n=(65,535+1)(1\\text{ ms})\n=65.536\\text{ s}.\n\\]\nThe minimum duration is one timer tick:\n\\[\nt_{\\min}=1\\text{ ms}.\n\\]\nHowever, the delay_ms() function uses chunking to support durations longer than 65.536 seconds. The variable chunk limits each individual TIM6 interval to 65,536 ms:\nuint32_t chunk = (ms &gt; 65536UL) ? 65536UL : ms;\nIf the requested duration is greater than 65,536 ms, the function repeatedly runs TIM6 and subtracts each completed chunk from ms:\nms -= chunk;\nThe ms variable is a uint32_t, so the largest duration that can be requested is\n\\[\nt_{\\max,\\text{chunked}}\n=(2^{32}-1)(1\\text{ ms})\n\\]\n\\[\n=4,294,967.295\\text{ s}\n\\]\nor approximately\n\\[\n49.71\\text{ days}\n\\]\nTherefore, the system supports durations from 1 ms to 65.536 s per TIM6 interval, while the chunked delay_ms() function can represent durations up to approximately 49.71 days."
   }
 ]

@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Joshua Ikehara">
+<meta name="dcterms.date" content="2026-09-29">
 
-<title>lab4 – E155 Porfolio</title>
+<title>Lab 4: Digital Audio – E155 Porfolio</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -74,6 +76,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -153,17 +184,285 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology"><span class="header-section-number">2</span> Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation"><span class="header-section-number">3</span> Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#schematic" id="toc-schematic" class="nav-link" data-scroll-target="#schematic"><span class="header-section-number">3.1</span> Schematic</a></li>
+  <li><a href="#frequency-calculations" id="toc-frequency-calculations" class="nav-link" data-scroll-target="#frequency-calculations"><span class="header-section-number">3.2</span> frequency calculations</a></li>
+  <li><a href="#fur-elise-frequency-accuracy" id="toc-fur-elise-frequency-accuracy" class="nav-link" data-scroll-target="#fur-elise-frequency-accuracy"><span class="header-section-number">3.3</span> Fur Elise Frequency accuracy</a></li>
+  <li><a href="#checking-only-220-hz-and-1000-hz-is-not-sufficient" id="toc-checking-only-220-hz-and-1000-hz-is-not-sufficient" class="nav-link" data-scroll-target="#checking-only-220-hz-and-1000-hz-is-not-sufficient"><span class="header-section-number">3.4</span> Checking only 220 Hz and 1000 Hz is not sufficient</a></li>
+  <li><a href="#frequency-range" id="toc-frequency-range" class="nav-link" data-scroll-target="#frequency-range"><span class="header-section-number">3.5</span> Frequency Range</a></li>
+  <li><a href="#duration-calculations" id="toc-duration-calculations" class="nav-link" data-scroll-target="#duration-calculations"><span class="header-section-number">3.6</span> Duration calculations</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion"><span class="header-section-number">4</span> Results and Discussion</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  <li><a href="#ai-prototype" id="toc-ai-prototype" class="nav-link" data-scroll-target="#ai-prototype"><span class="header-section-number">6</span> AI prototype</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 4: Digital Audio</h1>
+<p class="subtitle lead">Hours Taken: 20 hours</p>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Ikehara </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">September 29, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
 
 
+</header>
 
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In this lab, a digital audio system was implementated using the STM32L432KC microcontroller, an LM386 audio amplifier, and an 8-ohm speaker. The MCU generate square-wave audio signals using the TIM2 timer and outputs them through PA0. A second timer, TIM6, is used to control the duration of each note in milliseconds. The system reads an array containing the pitch and duration of each note and sequentially plays Fur Elise. Rests are represented by a frequency of zero and produce silence for the specified duration.</p>
+<p>The system uses the MCU’s internal 16MHz HSI oscillator as the timer clock. TIM2 generates the desired pitch by changing its auto reload register based on the requested frequency, while TIM6 provides a 1kHz timing reference for note durations. An LM386 amplifier is used to increase the signal level sufficiently to drive the 8-ohm speaker.</p>
+</section>
+<section id="design-and-testing-methodology" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Design and Testing Methodology</h1>
+<p>The design was divided into three different components, clock configuration, pitch generation, and note duration control. First, the MCU was configured to use the 116 MHz HSI16 Oscillator. The <code>clock_init()</code> function enables the HSI oscillator and configures it as the system clock. The timer calculations therefore use a clock frequency of 16 MHz.</p>
+<p>TIM2 was configured to generate the audio waveform on PA0 using channel 1 in PWM mode. PA0 was configured for alternate function 1, which connects the pin to TIM2 channel 1. The TIM2 prescaler was set to zero, so the timer receives the full 16 MHz clock. For each note, the program calculate an appropriate divider from the desired frequency and uses the resulting value to configure the TIM2 auto-reload register. The compare register is set to approximately half of the period to produce a square wave with approximately 50% duty cycle. The pitch Calculation is based on:</p>
+<p><span class="math display">\[
+f_{out}=\frac{F_{CLK}}{ARR+1}
+\]</span> where <span class="math inline">\(F{CLK=16\text{MHz}}\)</span>. The divider is calculated usinig integer roundning:</p>
+<p><span class="math display">\[
+div=\operatorname{round}\left(\frac{16,000,000}{f_{target}}\right)
+\]</span></p>
+<p>and then sets</p>
+<p><span class="math display">\[
+ARR= div-1
+\]</span></p>
+<p>Thus, the actual output frequency is</p>
+<p><span class="math display">\[
+f_{actual}=\frac{16,000,000}{div}
+\]</span></p>
+<p>TIM6 was configured seperately as a millisecond timer. Its prescaler is calculated using:</p>
+<p><span class="math display">\[
+PSC=\frac{16,000,000}{1000}-1=15999,
+\]</span></p>
+<p>giving a 1kHz timer frequency. Therefore, each TIM6 count represents approximately 1 ms. The <code>delay_ms()</code> function uses this timer to generate the specified duration for each note.</p>
+<p>The program treats a frequency of 0 as a rest. In this case, the TIM2 compare register is set to zero, preventing divide by zero erros, and preventing the audio signal from being produced while TIM6 continues counting the duration of the rest. A duration of zero marks the end of the song.</p>
+<p>The design was tested first by observing the MCU’s output before connecting it to the LM386. An oscilliscope was used to verify the generated square waves and confirm the output frequency. The 220 Hz and 1000 Hz test cases were used to verify the frequency calculations were within 1% required by the lab specifications. The speaker was then connected after verifying that the power being supplied to the speaker from the LM386 was at an appropriate level by putting and 8 ohm resistor to measure the power consumption.</p>
+<p>The complete Fur Elise score was tested to verify that the notes played in the correct order, that the durations matched the score, and the rest produced silence. The potentiometer was also tested to verify it could control the output volume.</p>
+</section>
+<section id="technical-documentation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Technical Documentation</h1>
+<p>The source code for this project can be found in the associated GitHub repo: it consists of register definitions, the main application code, and the note data used to play fur Elise and Sodapop</p>
+<section id="schematic" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="schematic"><span class="header-section-number">3.1</span> Schematic</h2>
+<p>The schematic represents the external components used in the circuit including the MCU output, LM386 amplifier, potentometer, and 8-ohm speaker. components and connections internal to the MCU are not shown in the schematic. the appropriate power and ground connections are shown, and all external component values and part numbers are labeled.</p>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/schematic.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Eletrical Schematic of the Lab4 Digital Audio
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="frequency-calculations" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="frequency-calculations"><span class="header-section-number">3.2</span> frequency calculations</h2>
+<p>TIM2 uses the 16 MHz HSI clock with a prescaler of zero. The output frequency is therefore:</p>
+<p><span class="math display">\[
+f_{out}=\frac{16,000,000}{ARR+1}.
+\]</span></p>
+<p>The program calculates a rounded divider according to</p>
+<p><span class="math display">\[
+div=\operatorname{round}\left(\frac{16,000,000}{f_{target}}\right)
+\]</span></p>
+<p>and sets</p>
+<p><span class="math display">\[
+ARR=div-1.
+\]</span></p>
+<p>So, for a 440 Hz note,</p>
+<p><span class="math display">\[
+div=\operatorname{round}\left(\frac{16,000,000}{440}\right)=36,364.
+\]</span></p>
+<p>Thus,</p>
+<p><span class="math display">\[
+ARR=36,364-1=36,363
+\]</span></p>
+<p>and the resulting frequency is</p>
+<p><span class="math display">\[
+f_{actual}=\frac{16,000,000}{36,364}\approx439.996\text{ Hz}.
+\]</span></p>
+<p>The frequency error is</p>
+<p><span class="math display">\[
+\frac{|439.996-440|}{440}\times100
+\approx0.001\%.
+\]</span></p>
+<p>This demonstrates how the desired pitch is converted into a timer configuration.</p>
+<p>For the required 220 Hz test:</p>
+<p><span class="math display">\[
+div=\operatorname{round}\left(\frac{16,000,000}{220}\right)
+=72,727
+\]</span></p>
+<p>giving</p>
+<p><span class="math display">\[
+f_{actual}=\frac{16,000,000}{72,727}=\approx220.000825\text{ Hz}.
+\]</span></p>
+<p>the resulting error is approximately</p>
+<p><span class="math display">\[
+\frac{|219.999-220|}{440}\times100
+\approx0.000375\%
+\]</span></p>
+<p>For the required 1000 Hz test:</p>
+<p><span class="math display">\[
+div=\operatorname{round}\left(\frac{16,000,000}{1000}\right)
+=16,000
+\]</span></p>
+<p>and therefore,</p>
+<p><span class="math display">\[
+f_{actual}=\frac{16,000,000}{16,000}
+=1000\text{ Hz}.
+\]</span></p>
+<p>The error is 0%.</p>
+<p>Both required test frequencies are therefore within the specified 1% accuracy.</p>
+</section>
+<section id="fur-elise-frequency-accuracy" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="fur-elise-frequency-accuracy"><span class="header-section-number">3.3</span> Fur Elise Frequency accuracy</h2>
+<p><a href="https://docs.google.com/spreadsheets/d/1Lk2SUAyXlNmyI0sg6g_ELJxB5OatiOlhHa7MhIFZ5n4/edit?usp=sharing">Duration Calculation Spreadsheet</a></p>
+<p>To verify the accuracy of all notes in Fur Elise, the entire score and note durations were evaluated using the same calculations implemented in the C code and shown above. For each target frequency, the rounded divider, resulting ARR value, actual frequency, and percentage error were calculated.</p>
+</section>
+<section id="checking-only-220-hz-and-1000-hz-is-not-sufficient" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="checking-only-220-hz-and-1000-hz-is-not-sufficient"><span class="header-section-number">3.4</span> Checking only 220 Hz and 1000 Hz is not sufficient</h2>
+<p>It’s not sufficent because it does not guarantee that every note is within 1% accuracy. The timer is driven by a 16 MHz clock and can only use integer divider values, so each desired frequency must be approximated by the closest frequency that the timer can generate. Because the timer period can only change in increments of one clock cycle, the available frequency resolution depends on the desired frequency. This produces a different rounding error for each note, meaning that accuracy at two points in the operating range does not guarantee accuracy for all other notes. Therefore, every unique pitch used in Für Elise was checked individually to verify that its generated frequency is within 1% of the desired frequency.</p>
+</section>
+<section id="frequency-range" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="frequency-range"><span class="header-section-number">3.5</span> Frequency Range</h2>
+<p>For the theoretical maximum frequency, the smallest usable divider is 2 because thats the smallest number of counter ticks to see a complete period of timer counts.</p>
+<p><span class="math display">\[
+div_{min}=2
+\]</span></p>
+<p>Therefore, without changing the clock set ups and keeping the existing code, the max frequency that it supports is</p>
+<p><span class="math display">\[
+f_{max}=\frac{16,000,000}{2}
+=8,000,000\text{ Hz}.
+\]</span></p>
+<p>The theoretical minimum frequency is obtained from the largest possible 32-bit timer divider:</p>
+<p><span class="math display">\[
+div_{max}=2^{32}
+\]</span></p>
+<p>giving</p>
+<p><span class="math display">\[
+f_{min}=
+\frac{16,000,000}{2^{32}}
+\approx0.00373\text{ Hz}.
+\]</span></p>
+<p>These values represent the theoretical frequency limits of the timer configuration rather than the range of frequencies required for musical playback.</p>
+</section>
+<section id="duration-calculations" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="duration-calculations"><span class="header-section-number">3.6</span> Duration calculations</h2>
+<p>TIM6 is configured to generate a 1 kHz timing reference. Its prescaler is calculated as</p>
+<p><span class="math display">\[
+PSC=\frac{16,000,000}{1000}-1
+=15,999.
+\]</span></p>
+<p>Therefore, each timer count represents approximately</p>
+<p><span class="math display">\[
+\frac{1}{1000}\text{ s}=1\text{ ms}.
+\]</span></p>
+<p>Since TIM6 is a 16-bit timer, the largest value that can be stored in its auto-reload register is 65,535. Because the timer counts from 0 through the value in ARR, the maximum duration of a single TIM6 interval is</p>
+<p><span class="math display">\[
+t_{\max,\text{single}}
+=(65,535+1)(1\text{ ms})
+=65.536\text{ s}.
+\]</span></p>
+<p>The minimum duration is one timer tick:</p>
+<p><span class="math display">\[
+t_{\min}=1\text{ ms}.
+\]</span></p>
+<p>However, the delay_ms() function uses chunking to support durations longer than 65.536 seconds. The variable chunk limits each individual TIM6 interval to 65,536 ms:</p>
+<p>uint32_t chunk = (ms &gt; 65536UL) ? 65536UL : ms;</p>
+<p>If the requested duration is greater than 65,536 ms, the function repeatedly runs TIM6 and subtracts each completed chunk from ms:</p>
+<p>ms -= chunk;</p>
+<p>The ms variable is a uint32_t, so the largest duration that can be requested is</p>
+<p><span class="math display">\[
+t_{\max,\text{chunked}}
+=(2^{32}-1)(1\text{ ms})
+\]</span></p>
+<p><span class="math display">\[
+=4,294,967.295\text{ s}
+\]</span></p>
+<p>or approximately</p>
+<p><span class="math display">\[
+49.71\text{ days}
+\]</span></p>
+<p>Therefore, the system supports durations from 1 ms to 65.536 s per TIM6 interval, while the chunked delay_ms() function can represent durations up to approximately 49.71 days.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Results and Discussion</h1>
+<p>The STM32 successfully generated square-wave audio signals using TIM2 and played the provided Für Elise score through the LM386 amplifier and 8-ohm speaker. The timer-based pitch generation allowed different frequencies to be produced by changing the TIM2 auto-reload value for each note.</p>
+<p>The required 220 Hz and 1000 Hz calculations both produced less than 1% frequency error. The additional frequency analysis of the notes in Für Elise was used to verify that the timer configuration can reproduce the song’s pitches within the required accuracy.</p>
+<p>The TIM6 duration timer provided a 1 ms timing resolution, allowing the durations specified by the provided note array to be reproduced directly in milliseconds. Rests were handled by setting the TIM2 compare value to zero while continuing to run the duration timer. This allowed the system to pause between notes without stopping the timing sequence.</p>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<p>A digital audio system was successfully implemented using the STM32L432KC, TIM2, TIM6, an LM386 amplifier, and an 8-ohm speaker. TIM2 generated the pitches using PWM, while TIM6 provided millisecond-resolution timing for note and rest durations. The provided Für Elise score was successfully played with the required pitches, durations, and rests.</p>
+<p>The frequency calculations demonstrated that the system can generate both 220 Hz and 1000 Hz within the required 1% accuracy. The additional analysis of the unique pitches in Für Elise verified the frequency accuracy across the musical range used by the song. The potentiometer provided volume control, and an additional composition was implemented for the Excellence requirement.</p>
+<p>The design met the specified hardware, software, calculation, and documentation requirements. I spent a total of 20 working on this lab.</p>
+</section>
+<section id="ai-prototype" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> AI prototype</h1>
+<details>
+<summary>
+AI prototype screen shots
+</summary>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/1.png" class="img-fluid figure-img"></p>
+<figcaption>AI prototype 1</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/2.png" class="img-fluid figure-img"></p>
+<figcaption>AI prototype 2</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/3.png" class="img-fluid figure-img"></p>
+<figcaption>AI prototype 3</figcaption>
+</figure>
+</div>
+</details>
+<p>I used an LLM to help determine which timer on the STM32L432KC would be appropriate for generating frequencies from 220 Hz to 1 kHz. The LLM pointed me toward TIM2 and suggested using PA0 with TIM2_CH1, which matched the approach I had taken. It also identified the relevant frequency equation and registers, including the prescaler (PSC), auto-reload register (ARR), capture/compare register (CCR1), and GPIO alternate-function configuration. I found the LLM particularly useful for quickly pointing me toward the relevant sections of the reference manual, although I still needed to verify the register names, bit positions, and clock configuration against the actual documentation.</p>
+<p>Compared with manually searching the reference manual using Ctrl-F, the LLM was faster at connecting the different pieces together and explaining how they related to one another. However, its initial answer contained incomplete calculations and assumptions about the clock frequency, so I could not rely on it without checking the reference manual. This made the LLM more useful as a documentation navigation and explanation tool rather than as an authoritative source. Overall, the experience showed me that an LLM can significantly reduce the time needed to find relevant information in a complex datasheet, but the information still needs to be verified against the primary documentation before using it in code.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
