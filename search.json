@@ -362,5 +362,68 @@
     "title": "Lab 4: Digital Audio",
     "section": "3.6 Duration calculations",
     "text": "3.6 Duration calculations\nTIM6 is configured to generate a 1 kHz timing reference. Its prescaler is calculated as\n\\[\nPSC=\\frac{16,000,000}{1000}-1\n=15,999.\n\\]\nTherefore, each timer count represents approximately\n\\[\n\\frac{1}{1000}\\text{ s}=1\\text{ ms}.\n\\]\nSince TIM6 is a 16-bit timer, the largest value that can be stored in its auto-reload register is 65,535. Because the timer counts from 0 through the value in ARR, the maximum duration of a single TIM6 interval is\n\\[\nt_{\\max,\\text{single}}\n=(65,535+1)(1\\text{ ms})\n=65.536\\text{ s}.\n\\]\nThe minimum duration is one timer tick:\n\\[\nt_{\\min}=1\\text{ ms}.\n\\]\nHowever, the delay_ms() function uses chunking to support durations longer than 65.536 seconds. The variable chunk limits each individual TIM6 interval to 65,536 ms:\nuint32_t chunk = (ms &gt; 65536UL) ? 65536UL : ms;\nIf the requested duration is greater than 65,536 ms, the function repeatedly runs TIM6 and subtracts each completed chunk from ms:\nms -= chunk;\nThe ms variable is a uint32_t, so the largest duration that can be requested is\n\\[\nt_{\\max,\\text{chunked}}\n=(2^{32}-1)(1\\text{ ms})\n\\]\n\\[\n=4,294,967.295\\text{ s}\n\\]\nor approximately\n\\[\n49.71\\text{ days}\n\\]\nTherefore, the system supports durations from 1 ms to 65.536 s per TIM6 interval, while the chunked delay_ms() function can represent durations up to approximately 49.71 days."
+  },
+  {
+    "objectID": "labs/lab6/lab6.html",
+    "href": "labs/lab6/lab6.html",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "",
+    "text": "The objective of Lab 6 was to develp an Internet of Things (IoT) device using an STM 32L432KC microcontroller, a DS1722 digital temperature sensor, and an ESP8266 Wi-Fi module. The device was designed to measure ambient temperature, control onboard LED thruogh a webpage, and allow the user to configure the sensor’s measurement resolution.\nThe microcontroller communicates with the DS1722 using the Serial Peripherial Interface (SPI) and communicates with the ESP8266 using Universal Asynchronous Receiver-Transmitter (UART) connection. The ESP8266 hosts a web server that receives browser requests and forwards them to the microcontroller. The microcontroller interprets these requests, updataes the LED or temperature sensor configuration, reads the current temperature, and returns an HTML webpage containing the latest information.\nA primary focus of the lab was implementinig an SPI driver using the CMSIS device register defintions in stm32l432xx.h rather than relying on an external device driver. An osciliscope was used to examine the SPI transaction and compare the observed communication with the DS1722 datasheet."
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#hardware-design",
+    "href": "labs/lab6/lab6.html#hardware-design",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "2.1 Hardware Design",
+    "text": "2.1 Hardware Design\nThe Hardware consists of three main components, STM32L432KC development board, the DS1722 temperature sensor on an SOIC-8 breakout board, and the ESP8266 Wi-Fi module. The STM32L432KC serves as the central controller. It communicates with the DS1722 over SPI, drives the onboard LED through GPIO, and exchanges requests and webpage data with the ESP8266 over UART.\nThe DS1722 uses a chip-enable (CE) signal to identify the beginning and end of a communication transaction. The SPI clock and data signals are connected to the microcontroller’s SPI1 peripheral. The ESP8266 operates at 3.3 V and communicates with the microcontroller through crossed TX and RX connections.\nThe FPGA was disconnected from shared microcontroller pins by setting the relevant DIP switches to the open position. This prevents the FPGA from interfering with the GPIO and peripheral signals.\nThe connections used in the software are summarized below.\n\n\n\n\n\n\n\n\nSignal\nSTM32L432KC pin\nFunction\n\n\n\n\nDS1722 CE\nPA8\nSelects the temperature sensor\n\n\nSPI SCK\nPA5\nSPI clock\n\n\nSPI MISO / sensor SDO\nPA6\nSensor-to-MCU data\n\n\nSPI MOSI / sensor SDI\nPB5\nMCU-to-sensor data\n\n\nESP8266 UART TX\nPA9\nMCU transmits to ESP8266 RX\n\n\nESP8266 UART RX\nPA10\nMCU receives from ESP8266 TX\n\n\nOnboard LED\nPB3\nLED control output"
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#source-code-organization",
+    "href": "labs/lab6/lab6.html#source-code-organization",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "3.1 source code organization",
+    "text": "3.1 source code organization\nthe soruce code is organized into the following modules\n\n\n\n\n\n\n\nFile\nPurpose\n\n\n\n\nmain.c\nInitializes the system and implements the application loop and webpage generation\n\n\nmain.h\nDefines pin assignments and includes the required libraries\n\n\nDS1722.c\nImplements the temperature sensor driver\n\n\nDS1722.h\nDefines the DS1722 register addresses and function prototypes\n\n\nSTM32L432KC_SPI.c\nImplements SPI1 configuration and byte transfers using CMSIS registers\n\n\nSTM32L432KC_SPI.h\nDeclares the SPI driver interface\n\n\nSTM32L432KC_GPIO.c\nImplements GPIO configuration and digital input/output\n\n\nSTM32L432KC_GPIO.h\nDefines GPIO pin assignments and function prototypes\n\n\nSTM32L432KC_USART.c\nImplements UART initialization and character/string communication\n\n\nSTM32L432KC_USART.h\nDeclares the USART driver interface\n\n\nSTM32L432KC_RCC.c\nConfigures the system clock\n\n\nSTM32L432KC_RCC.h\nDeclares the clock configuration functions\n\n\nSTM32L432KC_TIM.c\nProvides timer initialization and delay functions\n\n\nSTM32L432KC_TIM.h\nDeclares the timer interface\n\n\nSTM32L432KC_FLASH.c\nConfigures flash latency and prefetch\n\n\nSTM32L432KC_FLASH.h\nDeclares the flash configuration function"
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#circuit-schematic",
+    "href": "labs/lab6/lab6.html#circuit-schematic",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "3.2 Circuit Schematic",
+    "text": "3.2 Circuit Schematic\n\n\n\n\n\n\nFigure 1: Lab 6 IoT and SPI Schematic\n\n\n\nThe schematic represents only the external components and wiring added to the development board. The onboard microcontroller, LED circuitry, and other motherboard components are not redrawn. Their relevant connections are referenced in the E155 development board schematic.\nThe DS1722 is shown on its SOIC-8 breakout board, with the sensor power, ground, CE, SCK, SDO, and SDI connections labeled. The ESP8266 is shown with its 3.3 V supply, ground, TX, and RX connections. The UART connections are crossed between the microcontroller and the ESP8266."
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#spi-transactioon-and-register-access",
+    "href": "labs/lab6/lab6.html#spi-transactioon-and-register-access",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "3.3 SPI Transactioon and Register Access",
+    "text": "3.3 SPI Transactioon and Register Access\nThe DS1722 communicates using serial transfers consisting of a register address followed by one or more data bytes. The microcontroller asserts CE to begin a transaction and clocks data into and out of the sensor using SCLK.\nFor a temperature read, the software starts at the temperature LSB register, transfers the address, and clocks out the two temperature bytes. The recieved bytes are combined into a 16 bit value.\nTiming annotations that are important from the data sheet vs what was measured\n\n\n\n\n\n\nFigure 2: timing anntations"
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#webpage-implementation",
+    "href": "labs/lab6/lab6.html#webpage-implementation",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "3.4 Webpage Implementation",
+    "text": "3.4 Webpage Implementation\nThe webpage is assembled from HTML strings defined in main.c. The webpageStart and webpageEnd strings define the beginning and end of the HTML document. Additional strings provide the LED controls and resolution-selection buttons.\nThe LED controls submit requests to the ledon and ledoff endpoints. The resolution controls submit requests to res8, res9, res10, res11, and res12.\nWhen the microcontroller receives a request, it processes the command before reading the temperature and transmitting the updated page. The response contains the LED state, the current temperature in degrees Celsius, and the resolution reported by the software.\nThe ESP8266 expects a complete HTML document and terminates the response when it receives\n\nor when the specified inter-byte timeout expires.\n\n\n\n\n\n\nFigure 3: Web interface for displaying temperature and controlling the LED"
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#temperature-and-formatting-timestamps",
+    "href": "labs/lab6/lab6.html#temperature-and-formatting-timestamps",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "4.1 Temperature and Formatting Timestamps",
+    "text": "4.1 Temperature and Formatting Timestamps\nThe runSoftwareTests() function tests the temperature formatting routine using known raw values. These tests check whether the conversion produces the expected positive, zero, and negative temperatures.\nThese values test the numerical conversion independently of the physical sensor (since we aren’t able to test at -10\\(^\\circ\\)). The expected values correspond to interpreting the raw register contents as a signed 8.8 fixed-point number.\n\n\nclick to view the serial console output from runSoftwareTests()\n\n\n\n\n\n\n\nFigure 4: Serial console output from runSoftwareTests()"
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#led-control",
+    "href": "labs/lab6/lab6.html#led-control",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "4.2 LED Control",
+    "text": "4.2 LED Control\nThe LED is controlled through the updateLEDStatus() function. When the received request contains ledon, the function sets LED_PIN high. When the request contains ledoff, it sets the pin low.\nAfter processing the command, the application reads the LED pin and uses the resulting state to generate the status displayed on the webpage."
+  },
+  {
+    "objectID": "labs/lab6/lab6.html#temperature-resolution-selection",
+    "href": "labs/lab6/lab6.html#temperature-resolution-selection",
+    "title": "Lab 6: The Internet of Things and Serial Peripheral Interface",
+    "section": "4.3 Temperature Resolution Selection",
+    "text": "4.3 Temperature Resolution Selection\nThe webpage provides controls for selecting 8-, 9-, 10-, 11-, and 12-bit sensor resolution. The updateResolution() function interprets the corresponding request, and ds1722SetResolution() attempts to configure the sensor through its configuration register.\nThe driver maintains a software variable called currentResolution. This variable is used to avoid unnecessary configuration writes and to determine the number of decimal places shown by the formatting function.\nHowever, the software variable alone does not prove that the sensor has accepted the configuration. The register value should be checked through ds1722ReadConfig()."
   }
 ]
