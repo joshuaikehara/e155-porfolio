@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Joshua Ikehara">
+<meta name="dcterms.date" content="2026-10-27">
 
-<title>lab7 – E155 Porfolio</title>
+<title>Lab 7: The Advanced Encryption Standard – E155 Porfolio</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +27,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -153,17 +190,347 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#design-and-testing-methodology" id="toc-design-and-testing-methodology" class="nav-link" data-scroll-target="#design-and-testing-methodology"><span class="header-section-number">2</span> Design and Testing Methodology</a></li>
+  <li><a href="#technical-documentation" id="toc-technical-documentation" class="nav-link" data-scroll-target="#technical-documentation"><span class="header-section-number">3</span> Technical Documentation</a>
+  <ul class="collapse">
+  <li><a href="#block-diagram" id="toc-block-diagram" class="nav-link" data-scroll-target="#block-diagram"><span class="header-section-number">3.1</span> Block Diagram</a></li>
+  </ul></li>
+  <li><a href="#results-and-discussion" id="toc-results-and-discussion" class="nav-link" data-scroll-target="#results-and-discussion"><span class="header-section-number">4</span> Results and Discussion</a>
+  <ul class="collapse">
+  <li><a href="#testbench-simulation" id="toc-testbench-simulation" class="nav-link" data-scroll-target="#testbench-simulation"><span class="header-section-number">4.1</span> Testbench Simulation</a></li>
+  <li><a href="#spi-communication-with-logic-analyzer" id="toc-spi-communication-with-logic-analyzer" class="nav-link" data-scroll-target="#spi-communication-with-logic-analyzer"><span class="header-section-number">4.2</span> SPI communication with Logic analyzer</a></li>
+  </ul></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">5</span> Conclusion</a></li>
+  <li><a href="#ai-prototype-summary" id="toc-ai-prototype-summary" class="nav-link" data-scroll-target="#ai-prototype-summary"><span class="header-section-number">6</span> AI Prototype Summary</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Lab 7: The Advanced Encryption Standard</h1>
+<p class="subtitle lead">Hours Taken: 15 hours</p>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Ikehara </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 27, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
 
 
+</header>
 
+
+<section id="introduction" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<p>In this lab, a 128-bit AES encryption accelerator was designed in SystemVerilog for the FPGA. The design accepts a 128-bit plaintext and a 128-bit encryption key, performs the ten AES encryption rounds, and produces a 128-bit ciphertext. An SPI interface connects the FPGA accelerator to the microcontroller, allowing the microcontroller to transmit the plaintext and key and receive the encrypted result.</p>
+<p>The design uses a sequential architecture to reduce the hardware resources required compared with implementing all ten rounds as one large combinational circuit.</p>
+</section>
+<section id="design-and-testing-methodology" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Design and Testing Methodology</h1>
+<p>The design was divided into a controller, a datapath, individual AES transformation modules, and an SPI interface.</p>
+<p>The data path implements the following AES operations</p>
+<ul>
+<li><p><strong>AddRouondKey</strong> :XORs the current state with the round key. *SubBytes: Substitutes each of the 16 state bytes using the AES S-box.</p></li>
+<li><p><strong>ShiftRows</strong>: Cyclically shifts each state row to the left by its row index.</p></li>
+<li><p><strong>MixColumns</strong>: Performs Galois field arithmetic on each state column.</p></li>
+<li><p><strong>KeyExpansion</strong>: Generates the next round key using rotation, S-box substitution, and the round constant.</p></li>
+</ul>
+<p>The aes_control module manages the encryption sequence, while aes_datapath prefrms the transformations and stores the intermediate state and round key. The controller uses the IDLE, LOAD, SUBWAIT, ROUND, and DONE states to coordinate the operation.</p>
+<p>the S-box is implemented as a synchronous ROM using sbox_sync.sv and sboox.txt. Because ROM has a one-clock cycle read latency, the SUBWAIT state alloows the substituted bytes and key-expansion results to become avaible befre the next round is executed. The final round omits MIxCOlumns as specified by AES.</p>
+<p>THe SPI interfacte in aes_spi.sv recieves the 256 input bits with the plain text and key and shifts out the 128-bit ciphertext after the encryption completes. The interface uses SPI mode 0 with a low idle clock and data sampled on the rising edge</p>
+</section>
+<section id="technical-documentation" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Technical Documentation</h1>
+<p>the source code for the design is included in the lab7 project files on github</p>
+<section id="block-diagram" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="block-diagram"><span class="header-section-number">3.1</span> Block Diagram</h2>
+<p>The following block diagrams show the hierarchy of the implementation and the moodules interfaces and connections.</p>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_top.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Block Diagram of top AES module
+</figcaption>
+</figure>
+</div>
+<p>The top-level aes module instantiates the HSOSC oscillator, aes_spi, and aes_core. The oscillator supplies the clock for the AES core. The SPI interface handles serial communication, while the core performs encryption and signals completion through done.</p>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_control.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Block Diagram of controller AES module
+</figcaption>
+</figure>
+</div>
+<p>The controller generates the control signals that determine when the state is loaded and when each round advances.</p>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_datapath.jpg" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Block Diagram of datapath AES module
+</figcaption>
+</figure>
+</div>
+<p>The datapath contains the intermediate state and round-key registers, the AES transformation modules, and the feedback path that stores each round’s result. During the final round, the datapath bypasses MixColumns.</p>
+</section>
+</section>
+<section id="results-and-discussion" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Results and Discussion</h1>
+<section id="testbench-simulation" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="testbench-simulation"><span class="header-section-number">4.1</span> Testbench Simulation</h2>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_core.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: testbench results of aes core
+</figcaption>
+</figure>
+</div>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_core_zoom.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: testbench results of aes core zoomed in for result
+</figcaption>
+</figure>
+</div>
+<p>The core testbench applies the FIPS-197 test vector with key 2B7E151628AED2A6ABF7158809CF4F3C and plaintext 3243F6A8885A308D313198A2E0370734. The expected ciphertext is 3925841D02DC09FBDC118597196A0B32.</p>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_spi.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: testbench results of aes spi
+</figcaption>
+</figure>
+</div>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/aes_spi_zoom.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: testbench results of aes spi (zoomed in to ensure correct cyphertext)
+</figcaption>
+</figure>
+</div>
+<p>The full-system testbench exercises the serial input and output path in addition to the AES core. It sends the test vector over SPI, waits for encryption to complete, and captures the returned ciphertext.</p>
+</section>
+<section id="spi-communication-with-logic-analyzer" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="spi-communication-with-logic-analyzer"><span class="header-section-number">4.2</span> SPI communication with Logic analyzer</h2>
+<div id="fig-schematic" class="quarto-float quarto-figure quarto-figure-center anchored" data-fig-align="center">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/scope_13.png" class="img-fluid quarto-figure quarto-figure-center figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-schematic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: logic analyzer communication with SPI
+</figcaption>
+</figure>
+</div>
+<p>The AES accelerator was tested on the physical FPGA using SPI communication with the MCU. The logic analyzer captured SCK, SDI, SDO, LOAD, and DONE to verify the input transaction, encryption completion, and ciphertext transmission. The MCU sent the 128-bit plaintext and 128-bit key to the FPGA, which performed AES encryption and returned the 128-bit ciphertext over SPI. The received ciphertext matched the expected result, 3925841D02DC09FBDC118597196A0B32, turning on PA9 confirming that the hardware completed the full transaction successfully.</p>
+</section>
+</section>
+<section id="conclusion" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Conclusion</h1>
+<p>the AES is organized into individual modules with encryption transformations, a sequential datapath, a FSM controller, and an SPI interface. It is meant to preform all ten rounds of AES-128 encryption while accounting for the synchronous S-box read latency. All of the specs have been met and the system is working</p>
+<p>Total time spent: 15 hours</p>
+</section>
+<section id="ai-prototype-summary" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> AI Prototype Summary</h1>
+<details>
+<summary>
+Expand to view the LLM-generated code for KeyExpansion logic described in the FIPS-197 uploaded document
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode systemverilog code-with-copy"><code class="sourceCode systemverilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> aes_key_expansion_128 (</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">127</span>:<span class="dv">0</span>] prev_key,   <span class="co">// Input 128-bit key from previous round (w[i-4] .. w[i-1])</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">3</span>:<span class="dv">0</span>]   round,      <span class="co">// Current round index (1 to 10)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [<span class="dv">127</span>:<span class="dv">0</span>] next_key    <span class="co">// Output 128-bit key for next round</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Break previous key into 32-bit words w0, w1, w2, w3</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] w0, w1, w2, w3;</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> {w0, w1, w2, w3} = prev_key;</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Intermediate word signals</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] rot_word_out;</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] sub_word_out;</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] rcon;</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] temp;</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Next key words</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] w4, w5, w6, w7;</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 1. Instantiate RotWord and SubWord modules</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// RotWord: Performs a cyclic left shift of 1 byte on the input word</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    RotWord rot_inst (</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>        .in (w3),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        .out(rot_word_out)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">// SubWord: Applies the AES S-Box substitution independently to each of the 4 bytes</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    SubWord sub_inst (</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>        .in (rot_word_out),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        .out(sub_word_out)</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 2. Lookup table for Round Constant (Rcon[round], 0, 0, 0)</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always_comb</span> <span class="kw">begin</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="kw">case</span> (round)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd1</span>:  rcon = <span class="bn">32'h01_00_00_00</span>;</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd2</span>:  rcon = <span class="bn">32'h02_00_00_00</span>;</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd3</span>:  rcon = <span class="bn">32'h04_00_00_00</span>;</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd4</span>:  rcon = <span class="bn">32'h08_00_00_00</span>;</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd5</span>:  rcon = <span class="bn">32'h10_00_00_00</span>;</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd6</span>:  rcon = <span class="bn">32'h20_00_00_00</span>;</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd7</span>:  rcon = <span class="bn">32'h40_00_00_00</span>;</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd8</span>:  rcon = <span class="bn">32'h80_00_00_00</span>;</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd9</span>:  rcon = <span class="bn">32'h1B_00_00_00</span>;</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>            <span class="bn">4'd10</span>: rcon = <span class="bn">32'h36_00_00_00</span>;</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>            <span class="kw">default</span>: rcon = <span class="bn">32'h00_00_00_00</span>;</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        <span class="kw">endcase</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="co">// 3. Key Expansion combinational logic</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> temp = sub_word_out ^ rcon;</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> w4 = w0 ^ temp;</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> w5 = w1 ^ w4;</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> w6 = w2 ^ w5;</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> w7 = w3 ^ w6;</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pack the generated words into the output 128-bit key</span></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> next_key = {w4, w5, w6, w7};</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<details>
+<summary>
+Expand to view the LLM-generated code for KeyExpansion logic described by just logic
+</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode systemverilog code-with-copy"><code class="sourceCode systemverilog"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> key_expansion #(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">parameter</span> <span class="kw">int</span> Nk = <span class="dv">4</span>,             <span class="co">// Number of 32-bit words in the key</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">parameter</span> <span class="kw">int</span> Nr = <span class="dv">10</span>,            <span class="co">// Number of rounds</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">parameter</span> <span class="kw">int</span> TOTAL_WORDS = <span class="dv">4</span> * Nr + <span class="dv">4</span> <span class="co">// Total number of words generated</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)(</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [Nk*<span class="dv">32-1</span>:<span class="dv">0</span>]        key,  <span class="co">// Concatenated key input: key[0], key[1]...</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">input</span>  <span class="kw">logic</span> [<span class="dv">32-1</span>:<span class="dv">0</span>]           Rcon [TOTAL_WORDS/Nk], <span class="co">// Rcon array indexed by i/Nk</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">output</span> <span class="kw">logic</span> [TOTAL_WORDS*<span class="dv">32-1</span>:<span class="dv">0</span>] w_flat <span class="co">// Output concatenated array w</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Array of 32-bit words representing w[0] through w[4*Nr + 3]</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] w [<span class="dv">0</span>:TOTAL_WORDS<span class="dv">-1</span>];</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Pack output array into flat vector</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">generate</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">for</span> (<span class="kw">genvar</span> idx = <span class="dv">0</span>; idx &lt; TOTAL_WORDS; idx++) <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_pack_out</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>            <span class="kw">assign</span> w_flat[idx*<span class="dv">32</span> +: <span class="dv">32</span>] = w[idx];</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">endgenerate</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ------------------------------------------------------------------------</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 1: Initialize the first Nk words directly from the input key</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ------------------------------------------------------------------------</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="kw">generate</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>        <span class="kw">for</span> (<span class="kw">genvar</span> i = <span class="dv">0</span>; i &lt; Nk; i++) <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_init_key</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>            <span class="co">// Slice key into 4-byte (32-bit) words: key[4*i .. 4*i + 3]</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>            <span class="kw">assign</span> w[i] = key[i*<span class="dv">32</span> +: <span class="dv">32</span>];</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">endgenerate</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ------------------------------------------------------------------------</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Step 2: Generate remaining words (w[Nk] to w[4*Nr + 3]) sequentially</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ------------------------------------------------------------------------</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">generate</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="kw">for</span> (<span class="kw">genvar</span> i = Nk; i &lt; TOTAL_WORDS; i++) <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_expand_key</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>            <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] temp;</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>            <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] mod2_out;</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>            <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] mod1_out_branch1;</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>            <span class="kw">logic</span> [<span class="dv">31</span>:<span class="dv">0</span>] mod1_out_branch2;</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>            <span class="kw">if</span> (i % Nk == <span class="dv">0</span>) <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_mod_zero</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Condition 1: i mod Nk == 0</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>                <span class="co">// temp = module1(module2(w[i-1])) ^ Rcon[i/Nk]</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>                module2 u_module2 (</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>                    .in  (w[i<span class="dv">-1</span>]),</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>                    .out (mod2_out)</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>                );</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>                module1 u_module1 (</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>                    .in  (mod2_out),</span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>                    .out (mod1_out_branch1)</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>                );</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>                <span class="kw">assign</span> temp = mod1_out_branch1 ^ Rcon[i / Nk];</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>            <span class="kw">end</span> <span class="kw">else</span> <span class="kw">if</span> ((Nk &gt; <span class="dv">6</span>) &amp;&amp; (i % Nk == <span class="dv">4</span>)) <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_mod_four</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Condition 2: Nk &gt; 6 and i mod Nk == 4</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a>                <span class="co">// temp = module1(w[i-1])</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a>                module1 u_module1 (</span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a>                    .in  (w[i<span class="dv">-1</span>]),</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>                    .out (mod1_out_branch2)</span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>                );</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>                <span class="kw">assign</span> temp = mod1_out_branch2;</span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>            <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin :</span><span class="dt"> </span><span class="kw">g_default</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>                <span class="co">// Default condition: temp = w[i-1]</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>                <span class="kw">assign</span> temp = w[i<span class="dv">-1</span>];</span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>            <span class="kw">end</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>            <span class="co">// w[i] = w[i-Nk] ^ temp</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>            <span class="kw">assign</span> w[i] = w[i-Nk] ^ temp;</span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>    <span class="kw">endgenerate</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<p>After generating code with an LLM that had access to the FIPS-197 specification against code generated from pseudocode without the full specification. The first implementation was specific to AES-128 and calculated the next round key using RotWord, SubWord, and round constants. The second used parameters and generate loops to produce a more general key expansion module there’s no RotWord or SubWord and it’s just generic mdules and the indexed round constants aren’t there either.</p>
+<p>Ths experiment showed that witholding the full specs doesn’t prevent the LLM from generating useful code when pseudocode still describes the algrithm in detail. However, generated code can contain assumptions about the order and indexing that needs to be confimred. This is interesting becasue it can help lmit the information shared while still getting some guidance but we must be careful becuase it coould still reveal some important design details.</p>
+
+
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

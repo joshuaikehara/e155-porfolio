@@ -1,5 +1,33 @@
 [
   {
+    "objectID": "labs/lab7/lab7.html",
+    "href": "labs/lab7/lab7.html",
+    "title": "Lab 7: The Advanced Encryption Standard",
+    "section": "",
+    "text": "In this lab, a 128-bit AES encryption accelerator was designed in SystemVerilog for the FPGA. The design accepts a 128-bit plaintext and a 128-bit encryption key, performs the ten AES encryption rounds, and produces a 128-bit ciphertext. An SPI interface connects the FPGA accelerator to the microcontroller, allowing the microcontroller to transmit the plaintext and key and receive the encrypted result.\nThe design uses a sequential architecture to reduce the hardware resources required compared with implementing all ten rounds as one large combinational circuit."
+  },
+  {
+    "objectID": "labs/lab7/lab7.html#block-diagram",
+    "href": "labs/lab7/lab7.html#block-diagram",
+    "title": "Lab 7: The Advanced Encryption Standard",
+    "section": "3.1 Block Diagram",
+    "text": "3.1 Block Diagram\nThe following block diagrams show the hierarchy of the implementation and the moodules interfaces and connections.\n\n\n\n\n\n\nFigure 1: Block Diagram of top AES module\n\n\n\nThe top-level aes module instantiates the HSOSC oscillator, aes_spi, and aes_core. The oscillator supplies the clock for the AES core. The SPI interface handles serial communication, while the core performs encryption and signals completion through done.\n\n\n\n\n\n\nFigure 2: Block Diagram of controller AES module\n\n\n\nThe controller generates the control signals that determine when the state is loaded and when each round advances.\n\n\n\n\n\n\nFigure 3: Block Diagram of datapath AES module\n\n\n\nThe datapath contains the intermediate state and round-key registers, the AES transformation modules, and the feedback path that stores each round’s result. During the final round, the datapath bypasses MixColumns."
+  },
+  {
+    "objectID": "labs/lab7/lab7.html#testbench-simulation",
+    "href": "labs/lab7/lab7.html#testbench-simulation",
+    "title": "Lab 7: The Advanced Encryption Standard",
+    "section": "4.1 Testbench Simulation",
+    "text": "4.1 Testbench Simulation\n\n\n\n\n\n\nFigure 4: testbench results of aes core\n\n\n\n\n\n\n\n\n\nFigure 5: testbench results of aes core zoomed in for result\n\n\n\nThe core testbench applies the FIPS-197 test vector with key 2B7E151628AED2A6ABF7158809CF4F3C and plaintext 3243F6A8885A308D313198A2E0370734. The expected ciphertext is 3925841D02DC09FBDC118597196A0B32.\n\n\n\n\n\n\nFigure 6: testbench results of aes spi\n\n\n\n\n\n\n\n\n\nFigure 7: testbench results of aes spi (zoomed in to ensure correct cyphertext)\n\n\n\nThe full-system testbench exercises the serial input and output path in addition to the AES core. It sends the test vector over SPI, waits for encryption to complete, and captures the returned ciphertext."
+  },
+  {
+    "objectID": "labs/lab7/lab7.html#spi-communication-with-logic-analyzer",
+    "href": "labs/lab7/lab7.html#spi-communication-with-logic-analyzer",
+    "title": "Lab 7: The Advanced Encryption Standard",
+    "section": "4.2 SPI communication with Logic analyzer",
+    "text": "4.2 SPI communication with Logic analyzer\n\n\n\n\n\n\nFigure 8: logic analyzer communication with SPI\n\n\n\nThe AES accelerator was tested on the physical FPGA using SPI communication with the MCU. The logic analyzer captured SCK, SDI, SDO, LOAD, and DONE to verify the input transaction, encryption completion, and ciphertext transmission. The MCU sent the 128-bit plaintext and 128-bit key to the FPGA, which performed AES encryption and returned the 128-bit ciphertext over SPI. The received ciphertext matched the expected result, 3925841D02DC09FBDC118597196A0B32, turning on PA9 confirming that the hardware completed the full transaction successfully."
+  },
+  {
     "objectID": "labs/lab5/lab5.html",
     "href": "labs/lab5/lab5.html",
     "title": "Lab 5: Interrupts",
